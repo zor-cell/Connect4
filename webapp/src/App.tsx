@@ -34,7 +34,9 @@ function App() {
             .then(payload => {
                 let move: Position = {i: payload.moveI, j: payload.moveJ};
 
-                if(move.i < 0 || move.j < 0) {
+                console.log(payload, move.i, move.j)
+
+                if(move.i >= 0 && move.j >= 0) {
                     setBoard(payload.board);
                     setMoves(prev => [...prev, move]);
                     togglePlayer();

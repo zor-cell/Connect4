@@ -1,5 +1,7 @@
 package connect4.data;
 
+import java.util.Arrays;
+
 public class MovePayload {
     public int[][] board;
     public int moveI;
@@ -13,6 +15,7 @@ public class MovePayload {
 
     public MovePayload(int[][] board, Position movePosition) {
         this.board = board;
+
         if(movePosition == null) {
             this.moveI = -1;
             this.moveJ = -1;
@@ -20,5 +23,14 @@ public class MovePayload {
             this.moveI = movePosition.i;
             this.moveJ = movePosition.j;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "MovePayload{" +
+                "board=" + Arrays.deepToString(board) +
+                ", moveI=" + moveI +
+                ", moveJ=" + moveJ +
+                '}';
     }
 }

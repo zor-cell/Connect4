@@ -10,11 +10,11 @@ export class MovePayload {
     }
 
     public static parse(payload: any): MovePayload {
-        let objArr: object[] = JSON.parse(JSON.stringify(payload.board));
+        let objArr: object[] = JSON.parse(JSON.stringify(payload.o.f0));
         const board: number[][] = objArr.map(obj => Object.values(obj));
 
-        let moveI: number = payload.moveI;
-        let moveJ: number = payload.moveJ;
+        let moveI: number = payload.o.f1;
+        let moveJ: number = payload.o.f2;
 
         return new MovePayload(board, moveI, moveJ);
     }

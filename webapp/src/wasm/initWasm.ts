@@ -15,25 +15,24 @@ export async function loadLibrary(): Promise<void> {
 
 export async function computeBestMove(board: number[][], player: number): Promise<BestMovePayload> {
     if(lib === undefined) {
-        throw "java library not loaded yet";
+        throw "Java library not loaded yet";
     }
 
     //call java
     const Connector: any = await lib.connect4.Connector;
     const payload = await Connector.makeBestMove(board, player);
 
-    console.log(payload)
     return BestMovePayload.parse(payload);
 }
 
 export async function makeMove(board: number[][], player: number, position: Position): Promise<MovePayload> {
     if(lib === undefined) {
-        throw "java library not loaded yet";
+        throw "Java library not loaded yet";
     }
 
     //call java
     const Connector: any = await lib.connect4.Connector;
-    const payload = await Connector.makeMove(board, player, position.i, position.j);
+    const payload = await Connector.makeMove(board, player, position.j);
 
     return MovePayload.parse(payload);
 }
