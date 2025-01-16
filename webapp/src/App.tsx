@@ -1,5 +1,5 @@
 import './App.css'
-import {computeBestMove} from './wasm/initWasm.ts'
+import {computeBestMove, makeMove} from './wasm/initWasm.ts'
 import {useState} from "react";
 import Cell from "./Cell.tsx";
 
@@ -15,12 +15,22 @@ function App() {
     const [board, setBoard] = useState(createBoard(6, 7));
 
   function startComputation() {
-      let computation: Promise<Payload> = computeBestMove();
-      computation.then((payload: Payload) => {
-          setBoard(payload.board);
-      }).catch((e: any) => {
-          console.log(e);
-      });
+      computeBestMove(board)
+          .then(payload => {
+              setBoard(payload.board);
+          }).catch(err => {
+              console.log(err);
+          });
+  }
+
+  function startMakeMove(position: Position) {
+      makeMove(board, position)
+          .then(payload => {
+              setBoard(payload.board);
+          })
+          .catch(err => {
+              console.log(err);
+          });
   }
 
   return (
@@ -29,7 +39,11 @@ function App() {
               {board.map((row, rowIndex) => (
                   <div key={rowIndex} className="board-row">
                       {row.map((cell, colIndex) => (
-                          <Cell key={colIndex} cellValue={cell} cellPosition={{i: rowIndex, j: colIndex}}/>
+                          <Cell key={colIndex}
+                                cellValue={cell}
+                                cellPosition={{i: rowIndex, j: colIndex}}
+                                makeMove={startMakeMove}
+                          />
                       ))}
                   </div>
               ))}

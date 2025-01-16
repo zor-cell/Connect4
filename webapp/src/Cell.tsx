@@ -1,8 +1,8 @@
 import {FC} from "react";
 
-const Cell: FC<CellProps> = ({cellValue, cellPosition}) => {
-    function makeMove(position: Position) {
-
+const Cell: FC<CellProps> = ({cellValue, cellPosition, makeMove}) => {
+    function startMakeMove(position: Position) {
+        makeMove(position);
     }
 
     function getCellFromPlayer(player: number) {
@@ -16,7 +16,7 @@ const Cell: FC<CellProps> = ({cellValue, cellPosition}) => {
     }
 
     return (
-        <div className="board-cell" onClick={() => makeMove(cellPosition)}>
+        <div className="board-cell" onClick={() => startMakeMove(cellPosition)}>
             <div className={getCellFromPlayer(cellValue)}></div>
         </div>
     )

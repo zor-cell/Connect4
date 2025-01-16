@@ -14,8 +14,9 @@
 
     width: 60px;
     height: 60px;
-
     padding: 5px;
+
+    cursor: pointer;
 }
 
 .white-circle,
