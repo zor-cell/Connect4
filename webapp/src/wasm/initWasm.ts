@@ -1,3 +1,7 @@
+import {BestMovePayload} from "./BestMovePayload.ts";
+import {MovePayload} from "./MovePayload.ts";
+
+
 let lib = undefined;
 
 export async function loadLibrary(): Promise<void> {
@@ -9,19 +13,20 @@ export async function loadLibrary(): Promise<void> {
     console.log("java library loaded")
 }
 
-export async function computeBestMove(board: number[][]): Promise<Payload> {
+export async function computeBestMove(board: number[][], player: number): Promise<BestMovePayload> {
     if(lib === undefined) {
         throw "java library not loaded yet";
     }
 
     //call java
     const Connector: any = await lib.connect4.Connector;
-    const payload = await Connector.computeBestMove(board);
+    const payload = await Connector.makeBestMove(board, player);
 
-    return parsePayload(payload);
+    console.log(payload)
+    return BestMovePayload.parse(payload);
 }
 
-export async function makeMove(board: number[][], player: number, position: Position): Promise<Payload> {
+export async function makeMove(board: number[][], player: number, position: Position): Promise<MovePayload> {
     if(lib === undefined) {
         throw "java library not loaded yet";
     }
@@ -30,12 +35,5 @@ export async function makeMove(board: number[][], player: number, position: Posi
     const Connector: any = await lib.connect4.Connector;
     const payload = await Connector.makeMove(board, player, position.i, position.j);
 
-    return parsePayload(payload);
-}
-
-function parsePayload(javaPayload: any): Payload {
-    let objArr: object[] = JSON.parse(JSON.stringify(javaPayload.o.f0));
-    const board: number[][] = objArr.map(obj => Object.values(obj));
-
-    return {board: board};
+    return MovePayload.parse(payload);
 }

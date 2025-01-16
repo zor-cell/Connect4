@@ -1,3 +1,0 @@
-interface Payload {
-    board: number[][];
-}
