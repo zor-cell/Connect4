@@ -1,4 +1,4 @@
-package code;
+package connect4;
 
 public class Test {
     public String hello() {

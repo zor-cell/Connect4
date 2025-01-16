@@ -1,8 +1,8 @@
 # Java + WebAssembly
-This repository acts as a template to combine Java code with WebAssembly. The main purpose is to be able to write performant and efficient
-code that can be run in the web. This will be used for multiple projects regarding my blog.
+This repository acts as a template to combine Java connect4 with WebAssembly. The main purpose is to be able to write performant and efficient
+connect4 that can be run in the web. This will be used for multiple projects regarding my blog.
 
-The idea is to be able to call Java functions that have been compiled to WebAssembly from JavaScript code. This allows for a clean cut
+The idea is to be able to call Java functions that have been compiled to WebAssembly from JavaScript connect4. This allows for a clean cut
 of frontend logic in JavaScript and efficient computation in Java. 
 
 ## Start Frontend
@@ -22,9 +22,9 @@ _"Hello from Test!"_ in the console indicate successful WebAssembly integration.
 The Web page should display _"Hello from React!"_ to indicate proper React integration.
 
 ## Java Compilation
-To compile Java code to the intermediate WebAssembly format I am using [CheerPJ](https://cheerpj.com/).
+To compile Java connect4 to the intermediate WebAssembly format I am using [CheerPJ](https://cheerpj.com/).
 With this resource, any Java _.jar_ file can be used with JavaScript. This allows for
-independent development of the Java source code and the JavaScript frontend.
+independent development of the Java source connect4 and the JavaScript frontend.
 The dependency is accessed using the
 `<script src="https://cjrtnc.leaningtech.com/3.0/cj3loader.js"></script>`
 tag in the _index.html_ file, so no installations are needed.
@@ -43,6 +43,6 @@ new _.jar_ file in the _webapp/lib_ folder is included:
 ### Terminal .jar compilation
 The _.jar_ file can also be easily created from the terminal using the following commands:
 1. Compile java class files with Java 8:\
-`~/JavaWebAssembly: javac -source 1.8 -target 1.8 -d out src/code/*.java`
+`~/JavaWebAssembly: javac -source 1.8 -target 1.8 -d out src/connect4/*.java`
 2. Compile java class files to .jar file:\
 `~/JavaWebAssembly: jar cfm webapp/lib/JavaWebAssembly.jar src/META-INF/MANIFEST.MF -C out .`

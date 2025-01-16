@@ -1,19 +1,20 @@
-async function initWasm() {
+let lib = undefined;
+
+export async function loadLibrary() {
     //initialise cheerPJ
     await cheerpjInit();
 
     //load compiled .jar library
-    const lib = await cheerpjRunLibrary("/app/src/wasm/lib/JavaWebAssembly.jar");
-
-    //call Main
-    const Main = await lib.code.Main;
-    await Main.main([]);
-
-    //Call Test
-    const Test = await lib.code.Test;
-    let test = await new Test;
-    const response = await test.hello();
-    console.log(response);
+    lib = await cheerpjRunLibrary("/app/src/wasm/lib/JavaWebAssembly.jar");
+    console.log("java library loaded")
 }
 
-initWasm();
+export async function compute() {
+    if(lib === undefined) {
+        throw "java library not loaded yet";
+    }
+
+    //call computation
+    const Connector = await lib.connect4.Connector;
+    return await Connector.compute();
+}
