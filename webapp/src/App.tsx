@@ -2,6 +2,7 @@ import './App.css'
 import {computeBestMove, makeMove} from './wasm/initWasm.ts'
 import {useState} from "react";
 import Cell from "./Cell.tsx";
+import {GameState} from "./classes/GameState.ts";
 
 function createBoard(rows: number, cols: number): number[][] {
     return new Array(rows)
@@ -15,6 +16,7 @@ function App() {
     const [board, setBoard] = useState(createBoard(6, 7));
     const [currentPlayer, setCurrentPlayer] = useState(1);
     const [moves, setMoves] = useState(new Array<Position>());
+    const [gameState, setGameState] = useState(GameState.RUNNING);
 
     function togglePlayer() {
         setCurrentPlayer(prev => prev === 1 ? 2 : 1);
@@ -34,11 +36,10 @@ function App() {
             .then(payload => {
                 let move: Position = {i: payload.moveI, j: payload.moveJ};
 
-                console.log(payload, move.i, move.j)
-
                 if(move.i >= 0 && move.j >= 0) {
                     setBoard(payload.board);
                     setMoves(prev => [...prev, move]);
+                    setGameState(payload.gameState);
                     togglePlayer();
                 }
             })
@@ -80,6 +81,10 @@ function App() {
             <button onClick={() => startBestMove(currentPlayer)}>Best Move</button>
             <button onClick={undoMove} disabled={moves.length === 0}>Undo</button>
             <button>Human vs Human</button>
+
+            {gameState != GameState.RUNNING && <div>
+                {gameState == GameState.DRAW ? <p>ITS A DRAW!</p> : <p>PLAYER {gameState == GameState.PLAYER1 ? "1" : "2"} WON!</p>}
+            </div>}
         </div>
     )
 }

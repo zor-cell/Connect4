@@ -2,11 +2,13 @@ export class MovePayload {
     public board: number[][];
     public moveI: number;
     public moveJ: number;
+    public gameState: number;
 
-    constructor(board: number[][], moveI: number, moveJ: number) {
+    constructor(board: number[][], moveI: number, moveJ: number, gameState: number) {
         this.board = board;
         this.moveI = moveI;
         this.moveJ = moveJ;
+        this.gameState = gameState;
     }
 
     public static parse(payload: any): MovePayload {
@@ -15,7 +17,8 @@ export class MovePayload {
 
         let moveI: number = payload.o.f1;
         let moveJ: number = payload.o.f2;
+        let gameState: number = payload.o.f3;
 
-        return new MovePayload(board, moveI, moveJ);
+        return new MovePayload(board, moveI, moveJ, gameState);
     }
 }

@@ -6,23 +6,13 @@ public class MovePayload {
     public int[][] board;
     public int moveI;
     public int moveJ;
+    public int gameState;
 
-    public MovePayload(int[][] board, int moveI, int moveJ) {
+    public MovePayload(int[][] board, int moveI, int moveJ, int gameState) {
         this.board = board;
         this.moveI = moveI;
         this.moveJ = moveJ;
-    }
-
-    public MovePayload(int[][] board, Position movePosition) {
-        this.board = board;
-
-        if(movePosition == null) {
-            this.moveI = -1;
-            this.moveJ = -1;
-        } else {
-            this.moveI = movePosition.i;
-            this.moveJ = movePosition.j;
-        }
+        this.gameState = gameState;
     }
 
     @Override
@@ -31,6 +21,7 @@ public class MovePayload {
                 "board=" + Arrays.deepToString(board) +
                 ", moveI=" + moveI +
                 ", moveJ=" + moveJ +
+                ", gameState=" + gameState +
                 '}';
     }
 }

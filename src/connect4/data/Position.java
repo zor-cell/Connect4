@@ -9,7 +9,7 @@ public class Position {
         this.j = j;
     }
 
-    public boolean isInRange(int rows, int cols) {
+    public boolean isInBounds(int rows, int cols) {
         return i >= 0 && i < rows && j >= 0 && j < cols;
     }
 }
