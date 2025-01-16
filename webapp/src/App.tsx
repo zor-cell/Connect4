@@ -13,6 +13,11 @@ function createBoard(rows: number, cols: number): number[][] {
 
 function App() {
     const [board, setBoard] = useState(createBoard(6, 7));
+    const [currentPlayer, setCurrentPlayer] = useState(1);
+
+    function togglePlayer() {
+        setCurrentPlayer((prev) => prev === 1 ? 2 : 1);
+    }
 
   function startComputation() {
       computeBestMove(board)
@@ -23,10 +28,11 @@ function App() {
           });
   }
 
-  function startMakeMove(position: Position) {
-      makeMove(board, position)
+  function startMakeMove(position: Position, player: number) {
+      makeMove(board, player, position)
           .then(payload => {
               setBoard(payload.board);
+              togglePlayer();
           })
           .catch(err => {
               console.log(err);
@@ -42,6 +48,7 @@ function App() {
                           <Cell key={colIndex}
                                 cellValue={cell}
                                 cellPosition={{i: rowIndex, j: colIndex}}
+                                currentPlayer={currentPlayer}
                                 makeMove={startMakeMove}
                           />
                       ))}

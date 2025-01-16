@@ -1,5 +1,6 @@
 interface CellProps {
     cellValue: number;
     cellPosition: Position;
-    makeMove: (position: Position) => void;
+    currentPlayer: number;
+    makeMove: (position: Position, player: number) => void;
 }

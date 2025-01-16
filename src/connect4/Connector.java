@@ -10,8 +10,17 @@ public class Connector {
         return new Payload(board);
     }
 
-    public static Payload makeMove(int[][] board, int i, int j) {
-        board[i][j] = 1;
+    public static Payload makeMove(int[][] board, int player, int i, int j) {
+        int rows = board.length;
+        int cols = board[0].length;
+
+        int k = rows - 1;
+        while(k >= 0 && board[k][j] != 0) {
+            k--;
+        }
+        if(k >= 0) {
+            board[k][j] = player;
+        }
 
         return new Payload(board);
     }
