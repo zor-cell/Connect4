@@ -1,0 +1,11 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="JavaWebAssembly:jar">
+    <output-path>$PROJECT_DIR$/webapp/src/wasm/lib</output-path>
+    <root id="archive" name="JavaWebAssembly.jar">
+      <element id="module-output" name="JavaWebAssembly" />
+      <element id="directory" name="META-INF">
+        <element id="file-copy" path="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" />
+      </element>
+    </root>
+  </artifact>
+</component>
