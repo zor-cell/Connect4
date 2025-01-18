@@ -127,7 +127,7 @@ public class GameChecker {
         Position move = gameChecker.getMoveFromCol(j);
 
         //invalid move -> return the same board without doing any calculations
-        if(move == null) return new MovePayload(gameChecker.board, -1, -1, -1);
+        if(move == null) return new MovePayload(gameChecker.board, null, GameState.RUNNING);
 
         //make move
         gameChecker.makeMove(move, player);
@@ -135,6 +135,6 @@ public class GameChecker {
         //check game state with the made move
         GameState gameState = gameChecker.getGameState();
 
-        return new MovePayload(gameChecker.board, move.i, move.j, gameState.ordinal());
+        return new MovePayload(gameChecker.board, move, gameState);
     }
 }

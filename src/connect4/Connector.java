@@ -1,15 +1,20 @@
 package connect4;
 
+import connect4.data.GameState;
 import connect4.data.MovePayload;
-import connect4.data.BestMovePayload;
+import connect4.data.Position;
 
 public class Connector {
-    public static BestMovePayload makeBestMove(int[][] board, int player) {
-        return new BestMovePayload(board, true);
+    public static MovePayload makeBestMove(int[][] board, int player) {
+        return GameChecker.createMovePayload(board, player, 0);
     }
 
     public static MovePayload makeMove(int[][] board, int player, int j) {
         return GameChecker.createMovePayload(board, player, j);
+    }
+
+    public static MovePayload undoMove(int[][] board, Position position) {
+        return new MovePayload(board, position, GameState.RUNNING);
     }
 
     public static void main(String[] args) {

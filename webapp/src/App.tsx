@@ -1,8 +1,9 @@
 import './App.css'
-import {computeBestMove, makeMove} from './wasm/initWasm.ts'
-import {useState} from "react";
+import {computeBestMove, makeMove} from './wasm/connector.ts'
+import {useEffect, useState} from "react";
 import Cell from "./Cell.tsx";
 import {GameState} from "./classes/GameState.ts";
+import {toast, ToastContainer} from "react-toastify";
 
 function createBoard(rows: number, cols: number): number[][] {
     return new Array(rows)
@@ -15,8 +16,19 @@ function createBoard(rows: number, cols: number): number[][] {
 function App() {
     const [board, setBoard] = useState(createBoard(6, 7));
     const [currentPlayer, setCurrentPlayer] = useState(1);
-    const [moves, setMoves] = useState(new Array<Position>());
     const [gameState, setGameState] = useState(GameState.RUNNING);
+
+    const [moves, setMoves] = useState(new Array<Position>());
+
+    useEffect(() => {
+        //winning info
+        if(gameState === GameState.DRAW) {
+            toast.info("The game is a draw!")
+        } else if(gameState === GameState.PLAYER1 || gameState === GameState.PLAYER2) {
+            let winner = gameState === GameState.PLAYER1 ? "1" : "2";
+            toast.info(`Player ${winner} won!`);
+        }
+    }, [gameState])
 
     function togglePlayer() {
         setCurrentPlayer(prev => prev === 1 ? 2 : 1);
@@ -27,29 +39,29 @@ function App() {
             .then(payload => {
                 setBoard(payload.board);
             }).catch(err => {
-                console.log(err);
+                toast.warn(err)
             });
     }
 
     function startMakeMove(position: Position, player: number) {
         makeMove(board, player, position)
             .then(payload => {
-                let move: Position = {i: payload.moveI, j: payload.moveJ};
-
-                if(move.i >= 0 && move.j >= 0) {
+                if(payload.position.i >= 0 && payload.position.j >= 0) {
                     setBoard(payload.board);
-                    setMoves(prev => [...prev, move]);
+                    setMoves(prev => [...prev, payload.position]);
                     setGameState(payload.gameState);
                     togglePlayer();
                 }
             })
             .catch(err => {
-                console.log(err);
+                toast.warn(err);
             });
     }
 
-    function undoMove() {
+    function startUndoMove() {
         if(moves.length === 0) return;
+
+        //TODO undo should also run through backend
 
         const lastMove = moves[moves.length - 1];
 
@@ -79,12 +91,10 @@ function App() {
             </div>
 
             <button onClick={() => startBestMove(currentPlayer)}>Best Move</button>
-            <button onClick={undoMove} disabled={moves.length === 0}>Undo</button>
+            <button onClick={startUndoMove} disabled={moves.length === 0}>Undo</button>
             <button>Human vs Human</button>
 
-            {gameState != GameState.RUNNING && <div>
-                {gameState == GameState.DRAW ? <p>ITS A DRAW!</p> : <p>PLAYER {gameState == GameState.PLAYER1 ? "1" : "2"} WON!</p>}
-            </div>}
+            <ToastContainer/>
         </div>
     )
 }
