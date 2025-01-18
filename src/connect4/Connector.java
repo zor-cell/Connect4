@@ -14,6 +14,8 @@ public class Connector {
     }
 
     public static MovePayload undoMove(int[][] board, Position position) {
+        board[position.i][position.j] = 0;
+
         return new MovePayload(board, position, GameState.RUNNING);
     }
 

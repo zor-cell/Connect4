@@ -1,3 +1,5 @@
+import {Position} from "./Position.ts";
+
 interface CellProps {
     cellValue: number;
     cellPosition: Position;

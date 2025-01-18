@@ -1,4 +1,5 @@
 import {GameState} from "../../classes/GameState.ts";
+import {Position} from "../../classes/Position.ts";
 
 export class MovePayload {
     public board: number[][];
@@ -15,8 +16,8 @@ export class MovePayload {
         let objArr: object[] = JSON.parse(JSON.stringify(payload.o.f0));
         const board: number[][] = objArr.map(obj => Object.values(obj));
 
-        let position: Position = {i: payload.o.f1.f0, j: payload.o.f1.f1}
-        let gameState: number = payload.o.f3;
+        let position: Position = new Position(payload.o.f1.f0, payload.o.f1.f1);
+        let gameState: GameState = payload.o.f2.f1 as GameState;
 
         return new MovePayload(board, position, gameState);
     }

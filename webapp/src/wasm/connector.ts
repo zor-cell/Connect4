@@ -1,42 +1,50 @@
-import {BestMovePayload} from "./dtos/BestMovePayload.ts";
 import {MovePayload} from "./dtos/MovePayload.ts";
 import {toast} from "react-toastify";
+import {Position} from "../classes/Position.ts";
 
+export class Connector {
+    private static lib: any;
+    private static connector: any;
 
-let lib = undefined;
+    public static async loadLibrary(): Promise<void> {
+        //initialise cheerPJ
+        await cheerpjInit();
 
-export async function loadLibrary(): Promise<void> {
-    //initialise cheerPJ
-    await cheerpjInit();
-
-    const id = toast.loading("Loading resources...");
-
-    //load compiled .jar library
-    lib = await cheerpjRunLibrary("/app/src/wasm/lib/JavaWebAssembly.jar");
-    toast.update(id, {render: "Resources loaded!", type: "success", isLoading: false, autoClose: 5000});
-}
-
-export async function computeBestMove(board: number[][], player: number): Promise<BestMovePayload> {
-    if(lib === undefined) {
-        throw "Not all resources have been loaded yet!";
+        //load compiled .jar library
+        const id = toast.loading("Loading resources...");
+        this.lib = await cheerpjRunLibrary("/app/src/wasm/lib/JavaWebAssembly.jar");
+        this.connector = await this.lib.connect4.Connector;
+        toast.update(id, {render: "Resources loaded!", type: "success", isLoading: false, autoClose: 5000});
     }
 
-    //call java
-    const Connector: any = await lib.connect4.Connector;
-    const payload: any = await Connector.makeBestMove(board, player);
+    public static async computeBestMove(board: number[][], player: number): Promise<MovePayload> {
+        this.checkValidLib();
 
-    return BestMovePayload.parse(payload);
-}
+        const payload: any = await this.connector.makeBestMove(board, player);
 
-export async function makeMove(board: number[][], player: number, position: Position): Promise<MovePayload> {
-    if(lib === undefined) {
-        throw "Not all resources have been loaded yet!";
+        return MovePayload.deserialize(payload);
     }
 
-    //call java
-    const Connector: any = await lib.connect4.Connector;
-    const payload: any = await Connector.makeMove(board, player, position.j);
+    public static async makeMove(board: number[][], player: number, position: Position): Promise<MovePayload> {
+        this.checkValidLib();
 
-    console.log(payload)
-    return MovePayload.deserialize(payload);
+        const payload: any = await this.connector.makeMove(board, player, position.j);
+
+        return MovePayload.deserialize(payload);
+    }
+
+    public static async undoMove(board: number[][], position: Position): Promise<MovePayload> {
+        this.checkValidLib();
+
+        const posSerialized = await position.serialize(this.lib);
+        const payload: any = await this.connector.undoMove(board, posSerialized);
+
+        return MovePayload.deserialize(payload);
+    }
+
+    private static checkValidLib(): void {
+        if(this.lib === undefined) {
+            throw "Not all resources have been loaded yet!";
+        }
+    }
 }
