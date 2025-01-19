@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && npm run build:jar",
     "lint": "eslint .",
     "preview": "vite preview",
-    "build:jar": "javac -source 1.8 -target 1.8 -d out ../src/connect4/*.java && jar cfm dist/JavaWebAssembly.jar src/META-INF/MANIFEST.MF -C out ."
+    "build:jar": "find ../src/connect4 -name '*.java' > sources.txt && javac -source 1.8 -target 1.8 -d out @sources.txt && jar cfm dist/JavaWebAssembly.jar ../src/META-INF/MANIFEST.MF -C out ."
   },
   "dependencies": {
     "react": "^18.3.1",
