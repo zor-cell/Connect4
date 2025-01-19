@@ -1,4 +1,6 @@
 import {FC} from "react";
+import {CellProps} from "./classes/Props.ts"
+import {Position} from "./classes/Position.ts";
 
 const Cell: FC<CellProps> = ({cellValue, cellPosition, currentPlayer, makeMove}) => {
     function startMakeMove(position: Position, player: number) {

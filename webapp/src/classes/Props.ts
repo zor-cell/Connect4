@@ -1,6 +1,6 @@
 import {Position} from "./Position.ts";
 
-interface CellProps {
+export interface CellProps {
     cellValue: number;
     cellPosition: Position;
     currentPlayer: number;

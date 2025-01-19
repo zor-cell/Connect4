@@ -16,9 +16,9 @@ function createBoard(rows: number, cols: number): number[][] {
 
 function App() {
     const [board, setBoard] = useState(createBoard(6, 7));
+    const [gameOver, setGameOver] = useState(false);
     const [currentPlayer, setCurrentPlayer] = useState(1);
     const [gameState, setGameState] = useState(GameState.RUNNING);
-    const [gameOver, setGameOver] = useState(false);
 
     const [moves, setMoves] = useState(new Array<Position>());
 
@@ -95,7 +95,7 @@ function App() {
                         {row.map((cell, colIndex) => (
                             <Cell key={colIndex}
                                   cellValue={cell}
-                                  cellPosition={{i: rowIndex, j: colIndex}}
+                                  cellPosition={new Position(rowIndex, colIndex)}
                                   currentPlayer={currentPlayer}
                                   makeMove={startMakeMove}
                             />

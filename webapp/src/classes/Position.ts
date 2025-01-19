@@ -7,7 +7,7 @@ export class Position {
         this.j = j;
     }
 
-    public async serialize(lib: any): any {
+    public async serialize(lib: any): Promise<any> {
         const PositionLib: any = await lib.connect4.data.Position;
 
         return await new PositionLib(this.i, this.j);
