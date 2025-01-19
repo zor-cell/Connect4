@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build && npm run build:jar",
     "lint": "eslint .",
     "preview": "vite preview",
-    "build:jar": "mkdir java_build && find ../src/connect4 -name '*.java' > java_build/sources.txt && javac -source 1.8 -target 1.8 -d java_build/out @java_build/sources.txt && jar cfm dist/JavaWebAssembly.jar ../src/META-INF/MANIFEST.MF -C java_build/out . && rm -rf java_build"
+    "build:jar": "shx mkdir -p java_build/out && find ../src/connect4 -name '*.java' > java_build/sources.txt && javac -source 1.8 -target 1.8 -d java_build/out @java_build/sources.txt && jar cfm dist/JavaWebAssembly.jar ../src/META-INF/MANIFEST.MF -C java_build/out . && rm -rf java_build"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -25,6 +25,7 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.16",
     "globals": "^15.14.0",
+    "shx": "^0.3.4",
     "typescript": "~5.6.2",
     "typescript-eslint": "^8.18.2",
     "vite": "^6.0.5"
