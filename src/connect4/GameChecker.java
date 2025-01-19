@@ -5,14 +5,30 @@ import connect4.data.MovePayload;
 import connect4.data.Position;
 
 public class GameChecker {
-    private int[][] board;
-    private int rows;
-    private int cols;
+    private final int[][] board;
+    private final int rows;
+    private final int cols;
 
     public GameChecker(int[][] board) {
         this.board = board;
         this.rows = this.board.length;
         this.cols = this.board[0].length;
+    }
+
+    public static MovePayload createMovePayload(int[][] board, int player, int j) {
+        GameChecker gameChecker = new GameChecker(board);
+
+        //make move
+        Position move = gameChecker.makeMoveInCol(j, player);
+        if(move == null) {
+            //invalid move
+            return new MovePayload(gameChecker.board, null, GameState.RUNNING);
+        }
+
+        //check game state with the made move
+        GameState gameState = gameChecker.getGameState();
+
+        return new MovePayload(gameChecker.board, move, gameState);
     }
 
     public GameState getGameState() {
@@ -102,13 +118,16 @@ public class GameChecker {
         return GameState.RUNNING;
     }
 
-    public void makeMove(Position move, int player) {
-        if(move == null) return;
+    public Position makeMoveInCol(int col, int player) {
+        Position position = getMoveFromCol(col);
+        if(position == null) return null;
 
-        board[move.i][move.j] = player;
+        board[position.i][position.j] = player;
+
+        return position;
     }
 
-    public Position getMoveFromCol(int col) {
+    private Position getMoveFromCol(int col) {
         int i = rows - 1;
         while(i >= 0 && board[i][col] != 0) {
             i--;
@@ -118,23 +137,5 @@ public class GameChecker {
         }
 
         return null;
-    }
-
-    public static MovePayload createMovePayload(int[][] board, int player, int j) {
-        GameChecker gameChecker = new GameChecker(board);
-
-        //get the move from clicked column
-        Position move = gameChecker.getMoveFromCol(j);
-
-        //invalid move -> return the same board without doing any calculations
-        if(move == null) return new MovePayload(gameChecker.board, null, GameState.RUNNING);
-
-        //make move
-        gameChecker.makeMove(move, player);
-
-        //check game state with the made move
-        GameState gameState = gameChecker.getGameState();
-
-        return new MovePayload(gameChecker.board, move, gameState);
     }
 }
