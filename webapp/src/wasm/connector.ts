@@ -12,7 +12,7 @@ export class Connector {
 
         //load compiled .jar library
         const id = toast.loading("Loading resources...");
-        this.lib = await cheerpjRunLibrary("/app/src/wasm/lib/JavaWebAssembly.jar");
+        this.lib = await cheerpjRunLibrary("/app/lib/Connect4Lib.jar");
         this.connector = await this.lib.connect4.Connector;
         toast.update(id, {render: "Resources loaded!", type: "success", isLoading: false, autoClose: 5000});
     }
