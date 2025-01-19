@@ -4,7 +4,7 @@ import {useEffect, useState} from "react";
 import Cell from "./Cell.tsx";
 import {GameState} from "./classes/GameState.ts";
 import {toast, ToastContainer} from "react-toastify";
-import {Position} from "./classes/Position.ts";
+import {Position} from "./wasm/dtos/Position.ts";
 
 function createBoard(rows: number, cols: number): number[][] {
     return new Array(rows)
@@ -89,7 +89,7 @@ function App() {
 
     return (
         <div>
-            <div id="board">
+            <div id="board" style={{pointerEvents: gameOver ? "none" : "auto", opacity: gameOver ? 0.8 : 1}}>
                 {board.map((row, rowIndex) => (
                     <div key={rowIndex} className="board-row">
                         {row.map((cell, colIndex) => (

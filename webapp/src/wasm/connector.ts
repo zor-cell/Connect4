@@ -1,6 +1,6 @@
 import {MovePayload} from "./dtos/MovePayload.ts";
 import {toast} from "react-toastify";
-import {Position} from "../classes/Position.ts";
+import {Position} from "./dtos/Position.ts";
 
 export class Connector {
     private static lib: any;

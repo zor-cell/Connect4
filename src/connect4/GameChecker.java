@@ -32,16 +32,6 @@ public class GameChecker {
     }
 
     public GameState getGameState() {
-        //check for draw
-        boolean draw = true;
-        for(int j = 0;j < cols;j++) {
-            if(board[0][j] == 0) {
-                draw = false;
-                break;
-            }
-        }
-        if(draw) return GameState.DRAW;
-
         //check for winner
         for(int i = 0;i < rows;i++) {
             for(int j = 0;j < cols;j++) {
@@ -114,6 +104,16 @@ public class GameChecker {
                 if(udia) return cur == 1 ? GameState.PLAYER1 : GameState.PLAYER2;
             }
         }
+
+        //check for draw
+        boolean draw = true;
+        for(int j = 0;j < cols;j++) {
+            if(board[0][j] == 0) {
+                draw = false;
+                break;
+            }
+        }
+        if(draw) return GameState.DRAW;
 
         return GameState.RUNNING;
     }

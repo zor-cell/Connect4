@@ -1,5 +1,5 @@
 import {GameState} from "../../classes/GameState.ts";
-import {Position} from "../../classes/Position.ts";
+import {Position} from "./Position.ts";
 
 export class MovePayload {
     public board: number[][];
