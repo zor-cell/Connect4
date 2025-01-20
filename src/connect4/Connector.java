@@ -1,12 +1,13 @@
 package connect4;
 
-import connect4.data.GameState;
-import connect4.data.MovePayload;
-import connect4.data.Position;
+import connect4.data.*;
 
 public class Connector {
     public static MovePayload makeBestMove(int[][] board, int player) {
-        return GameSolver.findBestMove(board, player);
+        SolverConfig config = new SolverConfig(board, player, 2000, 0);
+        BestMove bestMove = Solver.startSolver(config);
+
+        return new MovePayload(board, bestMove.position, GameState.RUNNING);
     }
 
     public static MovePayload makeMove(int[][] board, int player, int j) {
