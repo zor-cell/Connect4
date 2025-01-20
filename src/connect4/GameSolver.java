@@ -45,7 +45,7 @@ public class GameSolver {
         GameSolver solver = new GameSolver(board);
 
         //has to be called in extra thread to be able to stop execution
-        BestMove bestMove = solver.negamax(board, 3, player);
+        BestMove bestMove = solver.negamax(board, 6, player);
         board[bestMove.position.i][bestMove.position.j] = player;
 
         System.out.println(bestMove);
@@ -138,7 +138,7 @@ public class GameSolver {
             }
         }
 
-        return score;
+        return Math.min(score, 1000); //cap score to 1000
     }
 
 
@@ -148,6 +148,7 @@ public class GameSolver {
         List<Position> positions = new ArrayList<>();
         for(int j = 0;j < cols;j++) {
             Position pos = getMoveFromCol(board, j);
+            if(pos == null) continue;
             positions.add(pos);
         }
         return positions;

@@ -46,6 +46,9 @@ function App() {
         Connector.computeBestMove(board, player)
             .then(payload => {
                 setBoard(payload.board);
+                setMoves(prev => [...prev, payload.position]);
+                setGameState(payload.gameState);
+                togglePlayer();
             }).catch(err => {
                 toast.warn(err)
             });

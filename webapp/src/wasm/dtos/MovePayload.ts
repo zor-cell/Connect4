@@ -5,11 +5,13 @@ export class MovePayload {
     public board: number[][];
     public position: Position;
     public gameState: GameState;
+    public score: number;
 
-    constructor(board: number[][], position: Position, gameState: GameState) {
+    constructor(board: number[][], position: Position, gameState: GameState, score: number = 0) {
         this.board = board;
         this.position = position;
         this.gameState = gameState;
+        this.score = score;
     }
 
     public static deserialize(payload: any): MovePayload {
@@ -18,7 +20,8 @@ export class MovePayload {
 
         let position: Position = new Position(payload.o.f1.f0, payload.o.f1.f1);
         let gameState: GameState = payload.o.f2.f1 as GameState;
+        let score: number = payload.o.f3;
 
-        return new MovePayload(board, position, gameState);
+        return new MovePayload(board, position, gameState, score);
     }
 }

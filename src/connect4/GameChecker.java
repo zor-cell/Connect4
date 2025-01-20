@@ -15,7 +15,7 @@ public class GameChecker {
         this.cols = this.board[0].length;
     }
 
-    public static MovePayload createMovePayload(int[][] board, int player, int j) {
+    public static MovePayload makeMove(int[][] board, int player, int j) {
         GameChecker gameChecker = new GameChecker(board);
 
         //make move
