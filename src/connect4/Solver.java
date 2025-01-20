@@ -31,7 +31,7 @@ public class Solver extends Thread {
                 {0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 1, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 1, -1, 0, 0},
                 {0, 0, 0, 1, -1, -1, 0},
         };
@@ -46,9 +46,13 @@ public class Solver extends Thread {
         Solver solverThread = new Solver(config);
         solverThread.start();
 
+        System.out.println("started solver thread");
         //stop finding best move after time limit
         ScheduledExecutorService schedulerService = Executors.newSingleThreadScheduledExecutor();
-        schedulerService.schedule(solverThread::interrupt, config.maxTime, TimeUnit.MILLISECONDS);
+        schedulerService.schedule(() -> {
+            solverThread.interrupt();
+            System.out.println("interrupting solver Thread");
+        }, config.maxTime, TimeUnit.MILLISECONDS);
 
         try {
             solverThread.join();
@@ -57,6 +61,8 @@ public class Solver extends Thread {
         } finally {
             schedulerService.shutdownNow();
         }
+
+        System.out.println(solverThread.getBestMove());
 
         return solverThread.getBestMove();
     }
@@ -70,13 +76,11 @@ public class Solver extends Thread {
         int depth = 1;
         try {
             //iterative deepening
-            for(depth = 1;depth <= 9;depth++) {
+            for(depth = 1;depth <= 15;depth++) {
                 prevBestMove = negamax(config.board, depth, config.player, Integer.MIN_VALUE, Integer.MAX_VALUE);
-                System.out.println(prevBestMove);
 
                 bestMove = prevBestMove;
             }
-            //bestMove = negamax(config.board, 2, config.player, Integer.MIN_VALUE, Integer.MAX_VALUE);
             System.out.println("Solver Thread finished normally");
         } catch(InterruptedException e) {
             System.out.println("Solver Thread interrupted. Reached depth " + depth);
@@ -85,7 +89,7 @@ public class Solver extends Thread {
 
     private BestMove negamax(int[][] board, int depth, int player, int alpha, int beta) throws InterruptedException {
         //break out of computation of thread interrupt
-        if(this.isInterrupted()) {
+        if(Thread.currentThread().isInterrupted()) {
             throw new InterruptedException();
         }
 
