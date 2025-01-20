@@ -2,6 +2,8 @@ package connect4.data;
 
 import connect4.Solver;
 
+import java.util.Arrays;
+
 public class SolverConfig {
     public int[][] board;
     public int player;
@@ -13,5 +15,15 @@ public class SolverConfig {
         this.player = player;
         this.maxTime = maxTime;
         this.maxDepth = maxDepth;
+    }
+
+    @Override
+    public String toString() {
+        return "SolverConfig{" +
+                "board=" + Arrays.deepToString(board) +
+                ", player=" + player +
+                ", maxTime=" + maxTime +
+                ", maxDepth=" + maxDepth +
+                '}';
     }
 }

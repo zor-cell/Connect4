@@ -1,6 +1,7 @@
 import {MovePayload} from "./dtos/MovePayload.ts";
 import {toast} from "react-toastify";
 import {Position} from "./dtos/Position.ts";
+import {SolverConfig} from "./dtos/SolverConfig.ts";
 
 export class Connector {
     private static lib: any;
@@ -17,10 +18,11 @@ export class Connector {
         toast.update(id, {render: "Resources loaded!", type: "success", isLoading: false, autoClose: 5000});
     }
 
-    public static async computeBestMove(board: number[][], player: number): Promise<MovePayload> {
+    public static async computeBestMove(config: SolverConfig): Promise<MovePayload> {
         this.checkValidLib();
 
-        const payload: any = await this.connector.makeBestMove(board, player);
+        const configSerialized = await config.serialize(this.lib);
+        const payload: any = await this.connector.makeBestMove(configSerialized);
 
         return MovePayload.deserialize(payload);
     }

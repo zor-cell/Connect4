@@ -36,7 +36,7 @@ public class Solver extends Thread {
                 {0, 0, 0, 1, -1, -1, 0},
         };
 
-        SolverConfig config = new SolverConfig(board, 1, 2000, 0);
+        SolverConfig config = new SolverConfig(board, 1, 500, 0);
         BestMove bestMove = startSolver(config);
         System.out.println(bestMove);
     }
@@ -70,7 +70,7 @@ public class Solver extends Thread {
         int depth = 1;
         try {
             //iterative deepening
-            for(depth = 1;depth <= 30;depth++) {
+            for(depth = 1;depth <= 9;depth++) {
                 prevBestMove = negamax(config.board, depth, config.player, Integer.MIN_VALUE, Integer.MAX_VALUE);
                 System.out.println(prevBestMove);
 
