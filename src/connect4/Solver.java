@@ -6,6 +6,7 @@ import connect4.data.Position;
 import connect4.data.SolverConfig;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -15,6 +16,8 @@ public class Solver extends Thread {
     private SolverConfig config;
     private final int rows;
     private final int cols;
+
+    private BestMove prevBestMove;
     private BestMove bestMove;
 
     public Solver(SolverConfig config) {
@@ -29,8 +32,8 @@ public class Solver extends Thread {
                 {0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 1, 0, 0, 0},
-                {0, 0, 0, 1, 0, -1, 0},
-                {0, 0, 1, 1, -1, -1, 0},
+                {0, 0, 0, 1, -1, 0, 0},
+                {0, 0, 0, 1, -1, -1, 0},
         };
 
         SolverConfig config = new SolverConfig(board, 1, 2000, 0);
@@ -67,43 +70,79 @@ public class Solver extends Thread {
         int depth = 1;
         try {
             //iterative deepening
-            /*for(depth = 1;depth <= 10;depth++) {
-                bestMove = negamax(config.board, depth, config.player);
-            }*/
-            bestMove = negamax(config.board, 1, config.player);
+            for(depth = 1;depth <= 30;depth++) {
+                prevBestMove = negamax(config.board, depth, config.player, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                System.out.println(prevBestMove);
+
+                bestMove = prevBestMove;
+            }
+            //bestMove = negamax(config.board, 2, config.player, Integer.MIN_VALUE, Integer.MAX_VALUE);
             System.out.println("Solver Thread finished normally");
         } catch(InterruptedException e) {
             System.out.println("Solver Thread interrupted. Reached depth " + depth);
         }
     }
 
-    private BestMove negamax(int[][] board, int depth, int player) throws InterruptedException {
+    private BestMove negamax(int[][] board, int depth, int player, int alpha, int beta) throws InterruptedException {
         //break out of computation of thread interrupt
         if(this.isInterrupted()) {
             throw new InterruptedException();
         }
 
+        //check if search or game is over
         GameState gameState = getGameState(board);
         if(depth == 0 || gameState != GameState.RUNNING) {
             int score = player * heuristics(board);
             return new BestMove(null, score);
         }
 
+        //check if player can easily win on next move
+        Position winningMove = canWinNextMove(board, player);
+        if(winningMove != null) {
+            return new BestMove(winningMove, player * 100000);
+        }
+
         BestMove bestMove = new BestMove(null, Integer.MIN_VALUE);
 
-        List<Position> moves = getPossiblePositions(board);
+        List<Position> moves = getPossibleMoves(board);
         for(Position move : moves) {
             makeMove(board, move, player);
-            int score = -negamax(board, depth - 1, -player).score;
+            int score = -negamax(board, depth - 1, -player, -beta, -alpha).score;
             unmakeMove(board, move);
 
+            //update best move
             if(score > bestMove.score) { //add randomness on equality
                 bestMove.position = move;
                 bestMove.score = score;
             }
+
+            //alpha-beta pruning
+            alpha = Math.max(alpha, score);
+            if(alpha >= beta) {
+                break;
+            }
         }
 
         return bestMove;
+    }
+
+    private Position canWinNextMove(int[][] board, int player) {
+        for(int j = 0;j < cols;j++) {
+            Position move = getMoveFromCol(board, j);
+            if(move == null) continue;
+
+            makeMove(board, move, player);
+            GameState gameState = getGameState(board);
+            unmakeMove(board, move);
+
+            if(player == 1 && gameState == GameState.PLAYER1) {
+                return move;
+            } else if(player == -1 && gameState == GameState.PLAYER2) {
+                return move;
+            }
+        }
+
+        return null;
     }
 
     private int heuristics(int[][] board) {
@@ -196,11 +235,21 @@ public class Solver extends Thread {
         return GameState.RUNNING;
     }
 
-    private List<Position> getPossiblePositions(int[][] board) {
-        //add move ordering
-
+    private List<Position> getPossibleMoves(int[][] board) {
         List<Position> positions = new ArrayList<>();
-        for(int j = 0;j < cols;j++) {
+
+        //order columns for better pruning
+        Integer[] orderedCols = {3, 2, 4, 1, 5, 0, 6}; //todo: adjust for dynamic columns
+        //search best move from previous iteration first
+        if(prevBestMove != null) Arrays.sort(orderedCols, (a, b) -> {
+            if(a.equals(prevBestMove.position.j)) return -1;
+            if(b.equals(prevBestMove.position.j)) return 1;
+
+            return 0;
+        });
+
+        //add valid moves
+        for(int j : orderedCols) {
             Position pos = getMoveFromCol(board, j);
             if(pos == null) continue;
             positions.add(pos);
