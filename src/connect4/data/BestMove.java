@@ -8,4 +8,12 @@ public class BestMove {
         this.position = position;
         this.score = score;
     }
+
+    @Override
+    public String toString() {
+        return "BestMove{" +
+                "position=" + position +
+                ", score=" + score +
+                '}';
+    }
 }

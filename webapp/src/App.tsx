@@ -37,7 +37,7 @@ function App() {
     }, [gameState])
 
     function togglePlayer() {
-        setCurrentPlayer(prev => prev === 1 ? 2 : 1);
+        setCurrentPlayer(prev => prev === 1 ? -1 : 1);
     }
 
     function startBestMove(player: number) {

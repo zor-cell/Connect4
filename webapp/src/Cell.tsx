@@ -10,7 +10,7 @@ const Cell: FC<CellProps> = ({cellValue, cellPosition, currentPlayer, makeMove})
     function getCellFromPlayer(player: number) {
         if(player === 1) {
             return 'red-circle';
-        } else if(player === 2) {
+        } else if(player === -1) {
             return 'yellow-circle';
         } else {
            return 'white-circle';

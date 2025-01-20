@@ -6,7 +6,7 @@ import connect4.data.Position;
 
 public class Connector {
     public static MovePayload makeBestMove(int[][] board, int player) {
-        return GameChecker.createMovePayload(board, player, 0);
+        return GameSolver.findBestMove(board, player);
     }
 
     public static MovePayload makeMove(int[][] board, int player, int j) {
