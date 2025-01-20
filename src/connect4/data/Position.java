@@ -12,4 +12,12 @@ public class Position {
     public boolean isInBounds(int rows, int cols) {
         return i >= 0 && i < rows && j >= 0 && j < cols;
     }
+
+    @Override
+    public String toString() {
+        return "Position{" +
+                "i=" + i +
+                ", j=" + j +
+                '}';
+    }
 }
