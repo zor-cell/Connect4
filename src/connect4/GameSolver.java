@@ -6,8 +6,10 @@ import connect4.data.MovePayload;
 import connect4.data.Position;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class GameSolver {
     private final int rows;
@@ -36,9 +38,6 @@ public class GameSolver {
                 {0, 0, 0, 1, 0, -1, 0},
                 {0, 0, 1, 1, -1, -1, 0},
         };
-
-        GameSolver solver = new GameSolver(board);
-        solver.findBestMove(board, 1);
     }
 
     public static MovePayload findBestMove(int[][] board, int player) {
