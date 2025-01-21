@@ -22,8 +22,6 @@ export class MovePayload {
         let gameState: GameState = payload.o.f2.f1 as GameState;
         let score: number = payload.o.f3;
 
-        console.log(board, position, gameState, score)
-
         return new MovePayload(board, position, gameState, score);
     }
 }

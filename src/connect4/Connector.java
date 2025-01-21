@@ -4,7 +4,6 @@ import connect4.data.*;
 
 public class Connector {
     public static MovePayload makeBestMove(SolverConfig config) {
-        System.out.println(config);
         BestMove bestMove = Solver.startSolver(config);
         config.board[bestMove.position.i][bestMove.position.j] = config.player;
 

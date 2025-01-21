@@ -8,14 +8,13 @@ import connect4.data.SolverConfig;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import com.leaningtech.cheerpj.Worker;
 
 public class Solver extends Thread {
     private SolverConfig config;
     private final int rows;
     private final int cols;
+    private long startTime;
 
     private BestMove prevBestMove;
     private BestMove bestMove;
@@ -36,30 +35,18 @@ public class Solver extends Thread {
                 {0, 0, 0, 1, -1, -1, 0},
         };
 
-        SolverConfig config = new SolverConfig(board, 1, 500, 0);
+        SolverConfig config = new SolverConfig(board, 1, 1000, 0);
         BestMove bestMove = startSolver(config);
-        System.out.println(bestMove);
     }
 
     public static BestMove startSolver(SolverConfig config) {
-        //find best move in separate thread
         Solver solverThread = new Solver(config);
         solverThread.start();
-
-        System.out.println("started solver thread");
-        //stop finding best move after time limit
-        ScheduledExecutorService schedulerService = Executors.newSingleThreadScheduledExecutor();
-        schedulerService.schedule(() -> {
-            solverThread.interrupt();
-            System.out.println("interrupting solver Thread");
-        }, config.maxTime, TimeUnit.MILLISECONDS);
 
         try {
             solverThread.join();
         } catch(InterruptedException e) {
             System.out.println("Main Thread interrupted");
-        } finally {
-            schedulerService.shutdownNow();
         }
 
         System.out.println(solverThread.getBestMove());
@@ -75,12 +62,21 @@ public class Solver extends Thread {
     public void run() {
         int depth = 1;
         try {
+            startTime = System.currentTimeMillis();
+
+            //copy board instance because on interrupt state board can be in any state
+            int[][] copy = new int[rows][cols];
+            for(int i = 0;i < rows;i++) {
+                System.arraycopy(config.board[i], 0, copy[i], 0, cols);
+            }
+
             //iterative deepening
-            for(depth = 1;depth <= 15;depth++) {
-                prevBestMove = negamax(config.board, depth, config.player, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            for(depth = 1;depth <= 28;depth++) {
+                prevBestMove = negamax(copy, depth, config.player, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
                 bestMove = prevBestMove;
             }
+
             System.out.println("Solver Thread finished normally");
         } catch(InterruptedException e) {
             System.out.println("Solver Thread interrupted. Reached depth " + depth);
@@ -89,7 +85,7 @@ public class Solver extends Thread {
 
     private BestMove negamax(int[][] board, int depth, int player, int alpha, int beta) throws InterruptedException {
         //break out of computation of thread interrupt
-        if(Thread.currentThread().isInterrupted()) {
+        if(System.currentTimeMillis() - startTime > config.maxTime) {
             throw new InterruptedException();
         }
 
@@ -181,7 +177,10 @@ public class Solver extends Thread {
                             //4 in a row
                             score += player * 1000;
                         } else if(countPlayer == 3 && countEmpty == 1) {
-                            //3 in row with one empty somewhere between
+                            //3 in row with 1 empty somewhere between
+                            score += player * 50;
+                        } else if(countPlayer == 2 && countEmpty == 2) {
+                            //2 in row with 2 empties somewhere between
                             score += player * 10;
                         }
                     }

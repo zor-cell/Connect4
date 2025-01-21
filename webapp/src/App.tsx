@@ -37,6 +37,12 @@ function App() {
         }
     }, [gameState])
 
+    useEffect(() => {
+        if(board && currentPlayer && currentPlayer == -1) {
+            startBestMove(currentPlayer);
+        }
+    }, [board, currentPlayer]);
+
     function togglePlayer() {
         setCurrentPlayer(prev => prev === 1 ? -1 : 1);
     }
@@ -44,7 +50,7 @@ function App() {
     function startBestMove(player: number) {
         if(gameOver) return;
 
-        let config = new SolverConfig(board, player, 500, 0);
+        let config = new SolverConfig(board, player, 3000, 0);
 
         Connector.computeBestMove(config)
             .then(payload => {
@@ -67,10 +73,6 @@ function App() {
                 setBoard(payload.board);
                 setMoves(prev => [...prev, payload.position]);
                 setGameState(payload.gameState);
-
-                //make computer move
-                startBestMove(player == 1 ? -1 : 1);
-
                 togglePlayer();
             })
             .catch(err => {
