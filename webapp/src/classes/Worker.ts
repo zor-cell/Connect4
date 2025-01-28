@@ -1,5 +1,4 @@
 import {WorkerRequest} from "./dtos/WorkerRequests.ts";
-import {toast} from "react-toastify";
 
 export let worker: Worker;
 export function initWorker() {
