@@ -3,15 +3,14 @@ package connect4;
 import connect4.data.BestMove;
 import connect4.data.GameState;
 import connect4.data.Position;
-import connect4.data.SolverConfig;
+import connect4.data.requests.SolverRequest;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import com.leaningtech.cheerpj.Worker;
 
 public class Solver extends Thread {
-    private SolverConfig config;
+    private SolverRequest config;
     private final int rows;
     private final int cols;
     private long startTime;
@@ -19,7 +18,7 @@ public class Solver extends Thread {
     private BestMove prevBestMove;
     private BestMove bestMove;
 
-    public Solver(SolverConfig config) {
+    public Solver(SolverRequest config) {
         this.config = config;
         this.rows = config.board.length;
         this.cols = config.board[0].length;
@@ -35,11 +34,11 @@ public class Solver extends Thread {
                 {0, 0, 0, 1, -1, -1, 0},
         };
 
-        SolverConfig config = new SolverConfig(board, 1, 1000, 0);
+        SolverRequest config = new SolverRequest(board, 1, 1000, 0);
         BestMove bestMove = startSolver(config);
     }
 
-    public static BestMove startSolver(SolverConfig config) {
+    public static BestMove startSolver(SolverRequest config) {
         Solver solverThread = new Solver(config);
         solverThread.start();
 
