@@ -1,6 +1,7 @@
 importScripts("https://cjrtnc.leaningtech.com/3.0/cj3loader.js");
 
 class Worker {
+    static loaded = false;
     static lib;
 
     static Connector;
@@ -10,22 +11,29 @@ class Worker {
     static Position;
 
     static async handleMessage(event) {
-        console.log("in worker", event.data);
+        //console.log("worker received", event.data);
 
-        let request = event.data.data;
-        switch(event.data.type) {
-            case 'LOAD':
-                await this.loadLibrary();
-                break;
-            case 'BESTMOVE':
-                await this.makeBestMove(request);
-                break;
-            case 'MOVE':
-                await this.makeMove(request);
-                break;
-            case 'UNDO':
-                await this.undoMove(request);
-                break;
+        try {
+            let request = event.data.data;
+            switch (event.data.type) {
+                case 'LOAD':
+                    await this.loadLibrary();
+                    break;
+                case 'BESTMOVE':
+                    await this.makeBestMove(request);
+                    break;
+                case 'MOVE':
+                    await this.makeMove(request);
+                    break;
+                case 'UNDO':
+                    await this.undoMove(request);
+                    break;
+            }
+        } catch(error) {
+            self.postMessage({
+                type: 'ERROR',
+                data: error.message
+            })
         }
     }
 
@@ -42,6 +50,7 @@ class Worker {
         this.MoveRequest = await this.lib.connect4.data.requests.MoveRequest;
         this.UndoRequest = await this.lib.connect4.data.requests.UndoRequest;
         this.Position = await this.lib.connect4.data.Position;
+        this.loaded = true;
 
         self.postMessage({
             type: 'LOAD',
@@ -53,9 +62,10 @@ class Worker {
         this.checkValidLib();
 
         const solverRequest = await new this.SolverRequest(request.board, request.player, request.maxTime, request.maxDepth);
+
         const payload = await this.Connector.makeBestMove(solverRequest);
+
         const solverResponse = this.deserializeResponse(payload);
-        console.log(solverResponse);
 
         self.postMessage({
             type: 'BESTMOVE',
@@ -96,8 +106,8 @@ class Worker {
     }
 
     static checkValidLib() {
-        if(this.lib === undefined) {
-            throw "Not all resources have been loaded yet!";
+        if(!this.loaded) {
+            throw new Error("Not all resources have been loaded yet!");
         }
     }
 

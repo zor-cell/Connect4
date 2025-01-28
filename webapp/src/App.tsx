@@ -5,7 +5,10 @@ import {GameState} from "./classes/GameState.ts";
 import {toast, ToastContainer} from "react-toastify";
 import {Position} from "./wasm/dtos/Position.ts";
 import {MoveRequest, SolverRequest, UndoRequest, WorkerRequest} from "./wasm/dtos/WorkerRequests.ts";
-import {worker} from "./wasm/workerConnector.ts";
+import {initWorker, loadingToastId, worker} from "./wasm/Worker.ts";
+import {ErrorResponse, MoveResponse, ResponseData, WorkerResponse} from "./wasm/dtos/WorkerResponses.ts";
+
+initWorker();
 
 function createBoard(rows: number, cols: number): number[][] {
     return new Array(rows)
@@ -16,6 +19,9 @@ function createBoard(rows: number, cols: number): number[][] {
 }
 
 function App() {
+    let isLoading: boolean = false;
+    let [isLoadingState, setIsLoadingState] = useState(false);
+
     const [board, setBoard] = useState(createBoard(6, 7));
     const [gameOver, setGameOver] = useState(false);
     const [currentPlayer, setCurrentPlayer] = useState(1);
@@ -24,36 +30,48 @@ function App() {
     const [moves, setMoves] = useState(new Array<Position>());
 
     worker.onmessage = (event) => {
-        console.log("message from worker", event.data);
-        const payload = event.data.data;
-        switch(event.data.type) {
+        console.log("main received", event.data);
+
+        const eventData: WorkerResponse = event.data;
+        let payload: ResponseData = eventData.data;
+        switch(eventData.type) {
             case 'LOAD':
-                const id = toast.loading("Loading resources...");
-                toast.update(id, {render: "Resources loaded!", type: "success", isLoading: false, autoClose: 5000});
+                toast.update(loadingToastId, {render: "Resources loaded!", type: "success", isLoading: false, autoClose: 5000});
+                toast.success("Resources loaded!");
                 break;
             case 'UNDO':
-                if(payload.position == null) return;
+                const undoPayload = payload as MoveResponse;
+                if(undoPayload.position == null) break;
 
-                setBoard(payload.board);
+                setBoard(undoPayload.board);
                 setMoves(prev => prev.slice(0, -1));
-                setGameState(payload.gameState);
+                setGameState(undoPayload.gameState);
                 togglePlayer();
                 break;
             case 'MOVE':
-                if(payload.position == null) return;
+                const movePayload = payload as MoveResponse;
+                if(movePayload.position == null) break;
 
-                setBoard(payload.board);
-                setMoves(prev => [...prev, payload.position]);
-                setGameState(payload.gameState);
+                setBoard(movePayload.board);
+                setMoves(prev => [...prev, movePayload.position]);
+                setGameState(movePayload.gameState);
                 togglePlayer();
                 break;
             case 'BESTMOVE':
+                const bestMovePayload = payload as MoveResponse;
+
+                setBoard(bestMovePayload.board);
+                setMoves(prev => [...prev, bestMovePayload.position]);
+                setGameState(bestMovePayload.gameState);
+                togglePlayer();
+                break;
+            case 'ERROR':
+                const errorPayload = payload as ErrorResponse;
+                toast.warn(errorPayload.message);
                 break;
         }
-    }
-    worker.onerror = (event) => {
-        console.log(event.message)
-        toast.warn(event.message);
+        isLoading = false;
+        setIsLoadingState(false);
     }
 
     useEffect(() => {
@@ -81,7 +99,9 @@ function App() {
     }
 
     function startBestMove(player: number) {
-        if(gameOver) return;
+        if(gameOver || isLoading) return;
+        isLoading = true;
+        setIsLoadingState(true);
 
         const solverRequest: SolverRequest = {
             board: board,
@@ -97,7 +117,9 @@ function App() {
     }
 
     function startMakeMove(position: Position, player: number) {
-        if(gameOver) return;
+        if(gameOver || isLoading) return;
+        isLoading = true;
+        setIsLoadingState(true);
 
         const moveRequest: MoveRequest = {
             board: board,
@@ -108,18 +130,17 @@ function App() {
             type: 'MOVE',
             data: moveRequest
         };
-        console.log("sending ", workerRequest)
         worker.postMessage(workerRequest);
     }
 
     function startUndoMove() {
-        if(moves.length === 0) return;
-
-        const lastMove = moves[moves.length - 1];
+        if(moves.length === 0 || isLoading) return;
+        isLoading = true;
+        setIsLoadingState(true);
 
         const undoRequest: UndoRequest = {
             board: board,
-            position: lastMove
+            position: moves[moves.length - 1]
         };
         const workerRequest: WorkerRequest = {
             type: 'UNDO',
@@ -143,10 +164,14 @@ function App() {
                         ))}
                     </div>
                 ))}
+
+                {isLoadingState && !gameOver && <div id="board-loading">
+                    <img src="/loading.gif" alt="Loading" width="30" height="30"/>
+                </div>}
             </div>
 
             <button onClick={() => startBestMove(currentPlayer)}>Best Move</button>
-            <button onClick={startUndoMove} disabled={moves.length === 0}>Undo</button>
+            <button onClick={startUndoMove} disabled={moves.length === 0 || isLoadingState}>Undo</button>
             <button>Human vs Human</button>
 
             <ToastContainer/>

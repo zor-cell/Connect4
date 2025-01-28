@@ -2,11 +2,17 @@ import {GameState} from "../../classes/GameState.ts";
 import {Position} from "./Position.ts";
 
 export interface WorkerResponse {
-    type: 'LOAD' | 'BESTMOVE',
-    data: MoveResponse
+    type: 'LOAD' | 'UNDO' | 'MOVE' | 'BESTMOVE' | 'ERROR',
+    data: ResponseData
 }
 
-export interface MoveResponse {
+export interface ResponseData {}
+
+export interface ErrorResponse extends ResponseData {
+    message: string
+}
+
+export interface MoveResponse extends ResponseData  {
      board: number[][],
      position: Position,
      gameState: GameState,
