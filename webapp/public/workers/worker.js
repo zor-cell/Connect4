@@ -1,9 +1,10 @@
 importScripts("https://cjrtnc.leaningtech.com/3.0/cj3loader.js");
 
+self.onmessage = (event) => Worker.handleMessage(event);
+
 class Worker {
     static loaded = false;
     static lib;
-
     static Connector;
     static SolverRequest;
     static MoveRequest;
@@ -130,5 +131,3 @@ class Worker {
         };
     }
 }
-
-self.onmessage = (event) => Worker.handleMessage(event);

@@ -1,4 +1,4 @@
-import {GameState} from "../../classes/GameState.ts";
+import {GameState} from "../GameState.ts";
 import {Position} from "./Position.ts";
 
 export interface WorkerResponse {

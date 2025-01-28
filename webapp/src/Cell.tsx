@@ -1,6 +1,6 @@
 import {FC} from "react";
 import {CellProps} from "./classes/Props.ts"
-import {Position} from "./wasm/dtos/Position.ts";
+import {Position} from "./classes/dtos/Position.ts";
 
 const Cell: FC<CellProps> = ({cellValue, cellPosition, currentPlayer, makeMove}) => {
     function startMakeMove(position: Position, player: number) {

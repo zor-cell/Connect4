@@ -1,4 +1,4 @@
-import {Position} from "../wasm/dtos/Position.ts";
+import {Position} from "./dtos/Position.ts";
 
 export interface CellProps {
     cellValue: number;

@@ -3,10 +3,10 @@ import {useEffect, useState} from "react";
 import Cell from "./Cell.tsx";
 import {GameState} from "./classes/GameState.ts";
 import {toast, ToastContainer} from "react-toastify";
-import {Position} from "./wasm/dtos/Position.ts";
-import {MoveRequest, SolverRequest, UndoRequest, WorkerRequest} from "./wasm/dtos/WorkerRequests.ts";
-import {initWorker, worker} from "./wasm/Worker.ts";
-import {ErrorResponse, MoveResponse, ResponseData, WorkerResponse} from "./wasm/dtos/WorkerResponses.ts";
+import {Position} from "./classes/dtos/Position.ts";
+import {MoveRequest, SolverRequest, UndoRequest, WorkerRequest} from "./classes/dtos/WorkerRequests.ts";
+import {initWorker, worker} from "./classes/Worker.ts";
+import {ErrorResponse, MoveResponse, ResponseData, WorkerResponse} from "./classes/dtos/WorkerResponses.ts";
 
 const loadingToastId = toast.loading("Loading resources...");
 initWorker();
