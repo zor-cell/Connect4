@@ -152,6 +152,7 @@ function App() {
                                   cellValue={cell}
                                   cellPosition={{i: rowIndex, j: colIndex}}
                                   currentPlayer={currentPlayer}
+                                  lastMove={moves.length == 0 ? null : moves[moves.length - 1]}
                                   makeMove={startMakeMove}
                             />
                         ))}

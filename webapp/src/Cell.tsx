@@ -2,7 +2,7 @@ import {FC} from "react";
 import {CellProps} from "./classes/Props.ts"
 import {Position} from "./classes/dtos/Position.ts";
 
-const Cell: FC<CellProps> = ({cellValue, cellPosition, currentPlayer, makeMove}) => {
+const Cell: FC<CellProps> = ({cellValue, cellPosition, currentPlayer, lastMove, makeMove}) => {
     function startMakeMove(position: Position, player: number) {
         makeMove(position, player);
     }
@@ -18,7 +18,7 @@ const Cell: FC<CellProps> = ({cellValue, cellPosition, currentPlayer, makeMove})
     }
 
     return (
-        <div className="board-cell" onClick={() => startMakeMove(cellPosition, currentPlayer)}>
+        <div className={`${lastMove != null && lastMove.i == cellPosition.i && lastMove.j == cellPosition.j ? 'last-move' : ''} board-cell`} onClick={() => startMakeMove(cellPosition, currentPlayer)}>
             <div className={getCellFromPlayer(cellValue)}></div>
         </div>
     )

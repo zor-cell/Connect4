@@ -51,6 +51,7 @@ class Worker {
         this.MoveRequest = await this.lib.connect4.data.requests.MoveRequest;
         this.UndoRequest = await this.lib.connect4.data.requests.UndoRequest;
         this.Position = await this.lib.connect4.data.Position;
+
         this.loaded = true;
 
         self.postMessage({
