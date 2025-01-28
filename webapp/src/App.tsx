@@ -5,22 +5,16 @@ import {GameState} from "./classes/GameState.ts";
 import {toast, ToastContainer} from "react-toastify";
 import {Position} from "./wasm/dtos/Position.ts";
 import {MoveRequest, SolverRequest, UndoRequest, WorkerRequest} from "./wasm/dtos/WorkerRequests.ts";
-import {initWorker, loadingToastId, worker} from "./wasm/Worker.ts";
+import {initWorker, worker} from "./wasm/Worker.ts";
 import {ErrorResponse, MoveResponse, ResponseData, WorkerResponse} from "./wasm/dtos/WorkerResponses.ts";
 
+const loadingToastId = toast.loading("Loading resources...");
 initWorker();
-
-function createBoard(rows: number, cols: number): number[][] {
-    return new Array(rows)
-        .fill(0)
-        .map(
-            () => new Array(cols).fill(0)
-        )
-}
 
 function App() {
     let isLoading: boolean = false;
-    let [isLoadingState, setIsLoadingState] = useState(false);
+    const [isLoadingState, setIsLoadingState] = useState(false);
+    const [maxTime, setMaxTime] = useState(3000);
 
     const [board, setBoard] = useState(createBoard(6, 7));
     const [gameOver, setGameOver] = useState(false);
@@ -37,7 +31,6 @@ function App() {
         switch(eventData.type) {
             case 'LOAD':
                 toast.update(loadingToastId, {render: "Resources loaded!", type: "success", isLoading: false, autoClose: 5000});
-                toast.success("Resources loaded!");
                 break;
             case 'UNDO':
                 const undoPayload = payload as MoveResponse;
@@ -106,7 +99,7 @@ function App() {
         const solverRequest: SolverRequest = {
             board: board,
             player: player,
-            maxTime: 3000,
+            maxTime: maxTime,
             maxDepth: 0
         };
         const workerRequest: WorkerRequest = {
@@ -173,6 +166,9 @@ function App() {
             <button onClick={() => startBestMove(currentPlayer)}>Best Move</button>
             <button onClick={startUndoMove} disabled={moves.length === 0 || isLoadingState}>Undo</button>
             <button>Human vs Human</button>
+            <input type="number" placeholder="Time in ms" defaultValue={maxTime} onChange={(event) => {
+                setMaxTime(event.target.valueAsNumber);
+            }}/>
 
             <ToastContainer/>
         </div>
@@ -180,3 +176,11 @@ function App() {
 }
 
 export default App
+
+function createBoard(rows: number, cols: number): number[][] {
+    return new Array(rows)
+        .fill(0)
+        .map(
+            () => new Array(cols).fill(0)
+        )
+}
