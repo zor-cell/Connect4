@@ -6,6 +6,7 @@ import {GameState} from "./classes/GameState.ts";
 import {toast, ToastContainer} from "react-toastify";
 import {Position} from "./wasm/dtos/Position.ts";
 import {SolverConfig} from "./wasm/dtos/SolverConfig.ts";
+import workerUrl from "./wasm/workers/bestMoveWorker.js?worker&url"
 
 function createBoard(rows: number, cols: number): number[][] {
     return new Array(rows)
@@ -52,15 +53,15 @@ function App() {
 
         let config = new SolverConfig(board, player, 3000, 0);
 
-        Connector.computeBestMove(config)
-            .then(payload => {
-                setBoard(payload.board);
-                setMoves(prev => [...prev, payload.position]);
-                setGameState(payload.gameState);
-                togglePlayer();
-            }).catch(err => {
-                toast.warn(err)
-            });
+        const worker = new Worker(workerUrl, { type: "classic" });
+        worker.onmessage = (event) => {
+            console.log("message from worker", event.data);
+        }
+        worker.onerror = (event) => {
+            console.log(event.message)
+            toast.warn(event.message);
+        }
+        worker.postMessage(config);
     }
 
     function startMakeMove(position: Position, player: number) {

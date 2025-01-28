@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="cheerpj-public">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/cheerpj-public.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
