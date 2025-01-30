@@ -166,7 +166,6 @@ function App() {
 
             <button onClick={() => startBestMove(currentPlayer)}>Best Move</button>
             <button onClick={startUndoMove} disabled={moves.length === 0 || isLoadingState}>Undo</button>
-            <button>Human vs Human</button>
             <input type="number" placeholder="Time in ms" defaultValue={maxTime} onChange={(event) => {
                 setMaxTime(event.target.valueAsNumber);
             }}/>

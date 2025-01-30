@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Solver extends Thread {
-    private SolverRequest config;
+    private final SolverRequest config;
     private final int rows;
     private final int cols;
     private long startTime;
@@ -38,8 +38,8 @@ public class Solver extends Thread {
         BestMove bestMove = startSolver(config);
     }
 
-    public static BestMove startSolver(SolverRequest config) {
-        Solver solverThread = new Solver(config);
+    public static BestMove startSolver(SolverRequest request) {
+        Solver solverThread = new Solver(request);
         solverThread.start();
 
         try {
@@ -47,8 +47,6 @@ public class Solver extends Thread {
         } catch(InterruptedException e) {
             System.out.println("Main Thread interrupted");
         }
-
-        System.out.println(solverThread.getBestMove());
 
         return solverThread.getBestMove();
     }
@@ -191,19 +189,22 @@ public class Solver extends Thread {
         return Math.max(Math.min(score, 1000), -1000);
     }
 
-    private GameState getGameState(int[][] board) {
+    public static GameState getGameState(int[][] board) {
+        int rows = board.length;
+        int cols = board[0].length;
+
         //check for win
+        int[][] dirs = {
+                {1, 0}, //vertical
+                {0, 1}, //horizontal
+                {1, 1}, //diagonal down
+                {1, -1} //diagonal up
+        };
+
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 int cur = board[i][j];
                 if(cur == 0) continue;
-
-                int[][] dirs = {
-                        {1, 0}, //vertical
-                        {0, 1}, //horizontal
-                        {1, 1}, //diagonal down
-                        {1, -1} //diagonal up
-                };
 
                 for (int[] dir : dirs) {
                     //check 4 in a row
@@ -259,8 +260,8 @@ public class Solver extends Thread {
         return positions;
     }
 
-    private Position getMoveFromCol(int[][] board, int col) {
-        int i = rows - 1;
+    public static Position getMoveFromCol(int[][] board, int col) {
+        int i = board.length - 1;
         while(i >= 0 && board[i][col] != 0) {
             i--;
         }
@@ -271,11 +272,11 @@ public class Solver extends Thread {
         return null;
     }
 
-    private void makeMove(int[][] board, Position move, int player) {
+    public static void makeMove(int[][] board, Position move, int player) {
         board[move.i][move.j] = player;
     }
 
-    private void unmakeMove(int[][] board, Position move) {
+    public static void unmakeMove(int[][] board, Position move) {
         board[move.i][move.j] = 0;
     }
 }

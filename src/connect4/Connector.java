@@ -6,20 +6,43 @@ import connect4.data.requests.SolverRequest;
 import connect4.data.requests.UndoRequest;
 
 public class Connector {
-    public static MovePayload makeBestMove(SolverRequest config) {
-        BestMove bestMove = Solver.startSolver(config);
-        config.board[bestMove.position.i][bestMove.position.j] = config.player;
+    public static MovePayload makeBestMove(SolverRequest request) {
+        //get best move
+        BestMove bestMove = Solver.startSolver(request);
 
-        return new MovePayload(config.board, bestMove.position, GameState.RUNNING);
+        //make best move
+        Solver.makeMove(request.board, bestMove.position, request.player);
+
+        //compute current game state
+        GameState gameState = Solver.getGameState(request.board);
+
+        return new MovePayload(request.board, bestMove.position, gameState);
     }
 
     public static MovePayload makeMove(MoveRequest request) {
-        return GameChecker.makeMove(request.board, request.player, request.position.j);
+        //get move
+        Position move = Solver.getMoveFromCol(request.board, request.position.j);
+        //check for invalid move
+        if(move == null) {
+            return new MovePayload(request.board, null, GameState.RUNNING);
+        }
+
+        //make valid move
+        Solver.makeMove(request.board, move, request.player);
+
+        //compute current game state
+        GameState gameState = Solver.getGameState(request.board);
+
+        return new MovePayload(request.board, move, gameState);
     }
 
     public static MovePayload undoMove(UndoRequest request) {
-        request.board[request.position.i][request.position.j] = 0;
+        //undo move
+        Solver.unmakeMove(request.board, request.position);
 
-        return new MovePayload(request.board, request.position, GameState.RUNNING);
+        //compute current game state (is not really necessary but why not)
+        GameState gameState = Solver.getGameState(request.board);
+
+        return new MovePayload(request.board, request.position, gameState);
     }
 }
