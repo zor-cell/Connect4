@@ -17,17 +17,17 @@ import {
 const loadingToastId = toast.loading("Loading resources...");
 initWorker();
 
+let isLoading: boolean = true;
 function App() {
-    let isLoading: boolean = false;
-    const [isLoadingState, setIsLoadingState] = useState(false);
+    const [isLoadingState, setIsLoadingState] = useState(isLoading);
     const [maxTime, setMaxTime] = useState(3000);
 
     const [board, setBoard] = useState(createBoard(6, 7));
     const [gameOver, setGameOver] = useState(false);
     const [currentPlayer, setCurrentPlayer] = useState(1);
     const [gameState, setGameState] = useState(GameState.RUNNING);
-
     const [moves, setMoves] = useState(new Array<Position>());
+    const [score, setScore] = useState(0);
 
     worker.onmessage = (event) => {
         console.log("main received", event.data);
@@ -62,6 +62,7 @@ function App() {
                 setBoard(solverResponse.board);
                 setMoves(prev => [...prev, solverResponse.position]);
                 setGameState(solverResponse.gameState);
+                setScore(solverResponse.score);
                 togglePlayer();
                 break;
             case 'ERROR':
@@ -69,10 +70,12 @@ function App() {
                 toast.warn(errorPayload.message);
                 break;
         }
+
         isLoading = false;
         setIsLoadingState(false);
     }
 
+    //print game state info
     useEffect(() => {
         //winning info
         if(gameState === GameState.DRAW) {
@@ -87,6 +90,7 @@ function App() {
         }
     }, [gameState])
 
+    //trigger computer move
     useEffect(() => {
         if(board && currentPlayer && currentPlayer == -1) {
             startBestMove(currentPlayer);
@@ -175,6 +179,7 @@ function App() {
             <input type="number" placeholder="Time in ms" defaultValue={maxTime} onChange={(event) => {
                 setMaxTime(event.target.valueAsNumber);
             }}/>
+            <p>score: {score}</p>
 
             <ToastContainer/>
         </div>
