@@ -1,5 +1,5 @@
 import './App.css'
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import Cell from "./Cell.tsx";
 import {GameState} from "./classes/GameState.ts";
 import {toast, ToastContainer} from "react-toastify";
@@ -28,6 +28,8 @@ function App() {
     const [gameState, setGameState] = useState(GameState.RUNNING);
     const [moves, setMoves] = useState(new Array<Position>());
     const [score, setScore] = useState(0);
+
+    const prevBoardRef = useRef(0);
 
     worker.onmessage = (event) => {
         console.log("main received", event.data);
@@ -90,15 +92,35 @@ function App() {
         }
     }, [gameState])
 
-    //trigger computer move
+    //trigger ai move
     useEffect(() => {
-        if(board && currentPlayer && currentPlayer == -1) {
+        if(!board) return;
+
+        //dont start ai move on undo
+        const currentPieceCount = countPieces(board);
+        const previousPieceCount = prevBoardRef.current;
+        prevBoardRef.current = currentPieceCount;
+        if(currentPieceCount < previousPieceCount) return;
+
+        //only start ai move when player is -1
+        if(currentPlayer && currentPlayer == -1) {
             startBestMove(currentPlayer);
         }
     }, [board, currentPlayer]);
 
     function togglePlayer() {
         setCurrentPlayer(prev => prev === 1 ? -1 : 1);
+    }
+
+    function abortWorker() {
+        worker.terminate();
+
+        isLoading = false;
+        setIsLoadingState(false);
+
+        if(currentPlayer == -1) {
+            //startUndoMove();
+        }
     }
 
     function startBestMove(player: number) {
@@ -174,7 +196,7 @@ function App() {
                 </div>}
             </div>
 
-            <button onClick={() => startBestMove(currentPlayer)}>Best Move</button>
+            <button onClick={abortWorker} disabled={!isLoadingState}>Abort</button>
             <button onClick={startUndoMove} disabled={moves.length === 0 || isLoadingState}>Undo</button>
             <input type="number" placeholder="Time in ms" defaultValue={maxTime} onChange={(event) => {
                 setMaxTime(event.target.valueAsNumber);
@@ -194,4 +216,8 @@ function createBoard(rows: number, cols: number): number[][] {
         .map(
             () => new Array(cols).fill(0)
         )
+}
+
+function countPieces(board: number[][]) {
+    return board.flat().filter(piece => piece !== 0).length;
 }
