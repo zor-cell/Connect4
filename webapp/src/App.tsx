@@ -6,7 +6,13 @@ import {toast, ToastContainer} from "react-toastify";
 import {Position} from "./classes/dtos/Position.ts";
 import {MoveRequest, SolverRequest, UndoRequest, WorkerRequest} from "./classes/dtos/WorkerRequests.ts";
 import {initWorker, worker} from "./classes/Worker.ts";
-import {ErrorResponse, MoveResponse, ResponseData, WorkerResponse} from "./classes/dtos/WorkerResponses.ts";
+import {
+    ErrorResponse,
+    MoveResponse,
+    ResponseData,
+    SolverResponse,
+    WorkerResponse
+} from "./classes/dtos/WorkerResponses.ts";
 
 const loadingToastId = toast.loading("Loading resources...");
 initWorker();
@@ -33,29 +39,29 @@ function App() {
                 toast.update(loadingToastId, {render: "Resources loaded!", type: "success", isLoading: false, autoClose: 5000});
                 break;
             case 'UNDO':
-                const undoPayload = payload as MoveResponse;
-                if(undoPayload.position == null) break;
+                const undoResponse = payload as MoveResponse;
+                if(undoResponse.position == null) break;
 
-                setBoard(undoPayload.board);
+                setBoard(undoResponse.board);
                 setMoves(prev => prev.slice(0, -1));
-                setGameState(undoPayload.gameState);
+                setGameState(undoResponse.gameState);
                 togglePlayer();
                 break;
             case 'MOVE':
-                const movePayload = payload as MoveResponse;
-                if(movePayload.position == null) break;
+                const moveResponse = payload as MoveResponse;
+                if(moveResponse.position == null) break;
 
-                setBoard(movePayload.board);
-                setMoves(prev => [...prev, movePayload.position]);
-                setGameState(movePayload.gameState);
+                setBoard(moveResponse.board);
+                setMoves(prev => [...prev, moveResponse.position]);
+                setGameState(moveResponse.gameState);
                 togglePlayer();
                 break;
             case 'BESTMOVE':
-                const bestMovePayload = payload as MoveResponse;
+                const solverResponse = payload as SolverResponse;
 
-                setBoard(bestMovePayload.board);
-                setMoves(prev => [...prev, bestMovePayload.position]);
-                setGameState(bestMovePayload.gameState);
+                setBoard(solverResponse.board);
+                setMoves(prev => [...prev, solverResponse.position]);
+                setGameState(solverResponse.gameState);
                 togglePlayer();
                 break;
             case 'ERROR':

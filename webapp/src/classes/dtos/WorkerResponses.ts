@@ -12,9 +12,15 @@ export interface ErrorResponse extends ResponseData {
     message: string
 }
 
+export interface SolverResponse extends ResponseData {
+    board: number[][],
+    position: Position,
+    gameState: GameState,
+    score: number
+}
+
 export interface MoveResponse extends ResponseData  {
      board: number[][],
      position: Position,
-     gameState: GameState,
-     score: number
+     gameState: GameState
 }

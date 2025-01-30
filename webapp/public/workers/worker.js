@@ -1,15 +1,20 @@
-importScripts("https://cjrtnc.leaningtech.com/3.0/cj3loader.js");
+importScripts(
+    "https://cjrtnc.leaningtech.com/3.0/cj3loader.js",
+    "deserialization.js"
+);
 
 self.onmessage = (event) => Worker.handleMessage(event);
 
 class Worker {
     static loaded = false;
     static lib;
+
     static Connector;
+    static Position;
+
     static SolverRequest;
     static MoveRequest;
     static UndoRequest;
-    static Position;
 
     static async handleMessage(event) {
         //console.log("worker received", event.data);
@@ -47,10 +52,10 @@ class Worker {
 
         //preload needed instance classes
         this.Connector = await this.lib.connect4.Connector;
+        this.Position = await this.lib.connect4.data.Position;
         this.SolverRequest = await this.lib.connect4.data.requests.SolverRequest;
         this.MoveRequest = await this.lib.connect4.data.requests.MoveRequest;
         this.UndoRequest = await this.lib.connect4.data.requests.UndoRequest;
-        this.Position = await this.lib.connect4.data.Position;
 
         this.loaded = true;
 
@@ -64,46 +69,37 @@ class Worker {
         this.checkValidLib();
 
         const solverRequest = await new this.SolverRequest(request.board, request.player, request.maxTime, request.maxDepth);
-
-        const payload = await this.Connector.makeBestMove(solverRequest);
-
-        const solverResponse = this.deserializeResponse(payload);
+        const solverResponse = await this.Connector.makeBestMove(solverRequest);
 
         self.postMessage({
             type: 'BESTMOVE',
-            data: solverResponse
+            data: deserializeSolverResponse(solverResponse)
         });
     }
 
     static async makeMove(request) {
         this.checkValidLib();
 
-        const position = await new this.Position(request.position.i, request.position.j);
-        const moveRequest = await new this.MoveRequest(request.board, request.player, position);
-
-        const payload = await this.Connector.makeMove(moveRequest);
-
-        const moveResponse = this.deserializeResponse(payload);
+        const requestPosition = await new this.Position(request.position.i, request.position.j);
+        const moveRequest = await new this.MoveRequest(request.board, request.player, requestPosition);
+        const moveResponse = await this.Connector.makeMove(moveRequest);
 
         self.postMessage({
             type: 'MOVE',
-            data: moveResponse
+            data: deserializeMoveResponse(moveResponse)
         })
     }
 
     static async undoMove(request) {
         this.checkValidLib();
 
-        const position = await new this.Position(request.position.i, request.position.j);
-        const undoRequest = await new this.UndoRequest(request.board, position);
-
-        const payload = await this.Connector.undoMove(undoRequest);
-
-        const undoResponse = this.deserializeResponse(payload);
+        const requestPosition = await new this.Position(request.position.i, request.position.j);
+        const undoRequest = await new this.UndoRequest(request.board, requestPosition);
+        const undoResponse = await this.Connector.undoMove(undoRequest);
 
         self.postMessage({
             type: 'UNDO',
-            data: undoResponse
+            data: deserializeMoveResponse(undoResponse)
         })
     }
 
@@ -111,24 +107,5 @@ class Worker {
         if(!this.loaded) {
             throw new Error("Not all resources have been loaded yet!");
         }
-    }
-
-    static deserializeResponse(payload) {
-        let objArr = JSON.parse(JSON.stringify(payload.o.f0));
-        const board = objArr.map(obj => Object.values(obj));
-
-        let position = {
-            i: payload.o.f1.f0,
-            j: payload.o.f1.f1
-        };
-        let gameState = payload.o.f2.f1;
-        let score = payload.o.f3;
-
-        return {
-            board: board,
-            position: position,
-            gameState: gameState,
-            score: score
-        };
     }
 }
