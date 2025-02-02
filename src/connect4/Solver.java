@@ -26,15 +26,17 @@ public class Solver extends Thread {
 
     public static void main(String[] args) {
         int[][] board = {
-                {0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, -1, 0, 0, 0},
-                {0, 0, 0, 1, 1, 0, 0},
+               //0, 1, 2, 3, 4, 5, 6
+                {0, 0, 0, 0, 0, 0, 0},   //0
+                {0, 0, 0, 0, 0, 0, 0},   //1
+                {0, 0, 0, 0, 0, 0, 0},   //2
+                {0, 0, 0, 0, 0, 0, 0},   //3
+                {0, 0, 0, -1, 0, 0, 0}, //4
+                {0, 0, 1, 1, 0, 0, 0},   //5
+               //0, 1, 2, 3, 4, 5, 6
         };
 
-        SolverRequest request = new SolverRequest(board, -1, 6000, 0);
+        SolverRequest request = new SolverRequest(board, -1, 3000, 0);
         BestMove bestMove = startSolver(request);
         System.out.println(bestMove);
     }
@@ -117,7 +119,7 @@ public class Solver extends Thread {
         List<Position> moves = getPossibleMoves(board);
         for(Position move : moves) {
             makeMove(board, move, player);
-            int score = -negamax(board, depth - 1, -player, -beta, -alpha).score;
+            int score = -negamax(board, depth - 1, -player, invert(beta), invert(alpha)).score;
             unmakeMove(board, move);
 
             //update best move
@@ -134,6 +136,17 @@ public class Solver extends Thread {
         }
 
         return bestMove;
+    }
+
+    //separate function due to asymmetric bounds
+    private int invert(int a) {
+        if(a == Integer.MIN_VALUE) {
+            return Integer.MAX_VALUE;
+        } else if(a == Integer.MAX_VALUE) {
+            return Integer.MIN_VALUE;
+        }
+
+        return -a;
     }
 
     private Position canWinNextMove(int[][] board, int player) {
