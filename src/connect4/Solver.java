@@ -30,12 +30,13 @@ public class Solver extends Thread {
                 {0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 1, -1, 0, 0},
-                {0, 0, 0, 1, -1, -1, 0},
+                {0, 0, 0, -1, 0, 0, 0},
+                {0, 0, 0, 1, 1, 0, 0},
         };
 
-        SolverRequest config = new SolverRequest(board, 1, 1000, 0);
-        BestMove bestMove = startSolver(config);
+        SolverRequest request = new SolverRequest(board, -1, 6000, 0);
+        BestMove bestMove = startSolver(request);
+        System.out.println(bestMove);
     }
 
     public static BestMove startSolver(SolverRequest request) {
@@ -61,27 +62,33 @@ public class Solver extends Thread {
         try {
             startTime = System.currentTimeMillis();
 
-            //copy board instance because on interrupt state board can be in any state
+            //copy board instance because on interrupt, board can be in any state
             int[][] copy = new int[rows][cols];
             for(int i = 0;i < rows;i++) {
                 System.arraycopy(config.board[i], 0, copy[i], 0, cols);
             }
 
+            int currentScore = heuristics(config.board);
+            System.out.println("static score: " + currentScore);
+
             //iterative deepening
-            for(depth = 1;depth <= 28;depth++) {
+            int maxDepth = config.maxDepth >= 1 ? config.maxDepth : 42;
+            for(depth = 1;depth <= maxDepth;depth++) {
+                //the best move score is > 0 when favorable for config.player (no matter which player)
                 prevBestMove = negamax(copy, depth, config.player, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                System.out.println("depth: " + depth + " " + prevBestMove);
 
                 bestMove = prevBestMove;
             }
 
-            System.out.println("Solver Thread finished normally");
+            System.out.println("Solver Thread finished!");
         } catch(InterruptedException e) {
-            System.out.println("Solver Thread interrupted. Reached depth " + depth);
+            System.out.println("Solver Thread interrupted. Reached depth " + (depth - 1) + "!");
         }
     }
 
     private BestMove negamax(int[][] board, int depth, int player, int alpha, int beta) throws InterruptedException {
-        //break out of computation of thread interrupt
+        //break out of computation when max thinking time is surpassed
         if(System.currentTimeMillis() - startTime > config.maxTime) {
             throw new InterruptedException();
         }
@@ -93,14 +100,20 @@ public class Solver extends Thread {
             return new BestMove(null, score);
         }
 
-        //check if player can easily win on next move
+        //check if player can easily win on next move and instantly make move
         Position winningMove = canWinNextMove(board, player);
         if(winningMove != null) {
             return new BestMove(winningMove, player * 100000);
         }
 
-        BestMove bestMove = new BestMove(null, Integer.MIN_VALUE);
+        //check if opponent can easily win on next move and instantly make move
+        /*Position opponentWinningMove = canWinNextMove(board, player * -1);
+        if(opponentWinningMove != null) {
+            return new BestMove(opponentWinningMove, player * heuristics(board));
+        }*/
 
+        //go through children positions
+        BestMove bestMove = new BestMove(null, Integer.MIN_VALUE);
         List<Position> moves = getPossibleMoves(board);
         for(Position move : moves) {
             makeMove(board, move, player);
@@ -108,7 +121,7 @@ public class Solver extends Thread {
             unmakeMove(board, move);
 
             //update best move
-            if(score > bestMove.score) { //add randomness on equality
+            if(score > bestMove.score) { //TODO: add randomness on equality
                 bestMove.position = move;
                 bestMove.score = score;
             }
@@ -147,19 +160,18 @@ public class Solver extends Thread {
         for(int player : new int[] {-1, 1}) {
             for (int i = 0; i < rows; i++) {
                 for (int j = 0; j < cols; j++) {
-                    if (board[i][j] != player) continue;
-
+                    //direction is important since no empty can be below v, dl and dr
                     int[][] dirs = {
-                            {1, 0}, //vertical
-                            {0, 1}, //horizontal
-                            {1, 1}, //diagonal down
-                            {1, -1} //diagonal up
+                            {-1, 0}, //vertical v
+                            {0, 1}, //horizontal h
+                            {-1, -1}, //diagonal left dl
+                            {-1, 1} //diagonal right dr
                     };
 
                     for (int[] dir : dirs) {
-                        int countPlayer = 1;
+                        int countPlayer = 0;
                         int countEmpty = 0;
-                        for (int k = 1; k < 4; k++) {
+                        for (int k = 0; k <= 3; k++) {
                             Position next = new Position(i + dir[0] * k, j + dir[1] * k);
                             if(!next.isInBounds(rows, cols)) break;
 
@@ -185,8 +197,7 @@ public class Solver extends Thread {
             }
         }
 
-        //cap score to 1000 and -1000
-        return Math.max(Math.min(score, 1000), -1000);
+        return score;
     }
 
     public static GameState getGameState(int[][] board) {
@@ -243,13 +254,19 @@ public class Solver extends Thread {
 
         //order columns for better pruning
         Integer[] orderedCols = {3, 2, 4, 1, 5, 0, 6}; //todo: adjust for dynamic columns
-        //search best move from previous iteration first
-        if(prevBestMove != null) Arrays.sort(orderedCols, (a, b) -> {
-            if(a.equals(prevBestMove.position.j)) return -1;
-            if(b.equals(prevBestMove.position.j)) return 1;
 
-            return 0;
-        });
+        //search best move from previous iteration first
+        if(prevBestMove != null) {
+            Arrays.sort(orderedCols, (a, b) -> {
+                if(a.equals(prevBestMove.position.j)) return -1;
+                if(b.equals(prevBestMove.position.j)) return 1;
+
+                return 0;
+            });
+
+            //previous move should only be looked at in first iteration
+            prevBestMove = null;
+        }
 
         //add valid moves
         for(int j : orderedCols) {
@@ -257,6 +274,7 @@ public class Solver extends Thread {
             if(pos == null) continue;
             positions.add(pos);
         }
+
         return positions;
     }
 
