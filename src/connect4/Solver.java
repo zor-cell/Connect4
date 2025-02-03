@@ -92,25 +92,18 @@ public class Solver extends Thread {
             throw new InterruptedException();
         }
 
+        //check if player can easily win on next move and instantly make move
+        Position winningMove = canWinNextMove(board, player);
+        if(winningMove != null) {
+            return new BestMove(winningMove, Scores.WIN, 0);
+        }
+
         //check if search or game is over
         GameState gameState = getGameState(board);
         if(depth == 0 || gameState != GameState.RUNNING) {
             int score = player * heuristics(board);
             return new BestMove(null, score);
         }
-
-        //check if player can easily win on next move and instantly make move
-        Position winningMove = canWinNextMove(board, player);
-        if(winningMove != null) {
-            return new BestMove(winningMove, Scores.WIN, 1);
-        }
-
-        /*
-        //check if opponent can easily win on next move and instantly make move
-        Position opponentWinningMove = canWinNextMove(board, player * -1);
-        if(opponentWinningMove != null) {
-            return new BestMove(opponentWinningMove, player * heuristics(board));
-        }*/
 
         //go through children positions
         BestMove bestMove = new BestMove(null, Integer.MIN_VALUE, -1);
@@ -127,7 +120,7 @@ public class Solver extends Thread {
             if(score > bestMove.score) { //TODO: add randomness on equality
                 bestMove.position = move;
                 bestMove.score = score;
-                if(winDistance > 0) {
+                if(winDistance >= 0 && (score >= Scores.WIN || score <= -Scores.WIN)) {
                     bestMove.winDistance = winDistance + 1;
                 }
             }

@@ -18,8 +18,6 @@ public class Connector {
         //compute current game state
         GameState gameState = Solver.getGameState(request.board);
 
-        System.out.println(bestMove);
-
         return new SolverResponse(request.board, gameState, bestMove);
     }
 

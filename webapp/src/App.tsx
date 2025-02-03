@@ -28,6 +28,7 @@ function App() {
     const [gameState, setGameState] = useState(GameState.RUNNING);
     const [moves, setMoves] = useState(new Array<Position>());
     const [score, setScore] = useState(0);
+    const [winDistance, setWinDistance] = useState(-1);
 
     const prevBoardRef = useRef(0);
 
@@ -66,6 +67,7 @@ function App() {
                 setMoves(prev => [...prev, solverResponse.bestMove.position]);
                 setGameState(solverResponse.gameState);
                 setScore(solverResponse.bestMove.score);
+                setWinDistance(solverResponse.bestMove.winDistance);
                 togglePlayer();
                 break;
             case 'ERROR':
@@ -203,6 +205,7 @@ function App() {
                 setMaxTime(event.target.valueAsNumber);
             }}/>
             <p>score: {score}</p>
+            {winDistance >= 0 && <p>Player {score > 0 ? "Yellow" : "Red"} wins in {winDistance} moves!</p>}
 
             <ToastContainer/>
         </div>
@@ -212,7 +215,7 @@ function App() {
 export default App
 
 function createBoard(rows: number, cols: number): number[][] {
-    return [
+    /*return [
     //0, 1, 2, 3, 4, 5, 6
      [0, 0, 0, 0, 0, 0, 0],   //0
      [0, 0, 0, 0, 0, 0, 0],   //1
@@ -221,7 +224,7 @@ function createBoard(rows: number, cols: number): number[][] {
      [0, 0, 1, 0, 0, 0, 0],   //4
      [0, 0, -1, -1, 0, 0, 0],   //5
     //0, 1, 2, 3, 4, 5, 6
-    ];
+    ];*/
 
     return new Array(rows)
         .fill(0)
