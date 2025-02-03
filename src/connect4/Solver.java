@@ -32,12 +32,12 @@ public class Solver extends Thread {
                 {0, 0, 0, 0, 0, 0, 0},   //1
                 {0, 0, 0, 0, 0, 0, 0},   //2
                 {0, 0, 0, 0, 0, 0, 0},   //3
-                {0, 0, -1, -1, 0, 0, 0}, //4
-                {0, 0, 1, 1, 0, 0, 0},   //5
+                {0, 0, 1, 1, 0, 0, 0}, //4
+                {0, 0, -1, -1, 0, 0, 0},   //5
                //0, 1, 2, 3, 4, 5, 6
         };
 
-        SolverRequest request = new SolverRequest(board, 1, -1, 12);
+        SolverRequest request = new SolverRequest(board, -1, -1, 3);
         BestMove bestMove = startSolver(request);
         System.out.println(bestMove);
     }
@@ -92,17 +92,17 @@ public class Solver extends Thread {
             throw new InterruptedException();
         }
 
-        //check if player can easily win on next move and instantly make move
-        Position winningMove = canWinNextMove(board, player);
-        if(winningMove != null) {
-            return new BestMove(winningMove, player * Scores.WIN, 1);
-        }
-
         //check if search or game is over
         GameState gameState = getGameState(board);
         if(depth == 0 || gameState != GameState.RUNNING) {
             int score = player * heuristics(board);
             return new BestMove(null, score);
+        }
+
+        //check if player can easily win on next move and instantly make move
+        Position winningMove = canWinNextMove(board, player);
+        if(winningMove != null) {
+            return new BestMove(winningMove, Scores.WIN, 1);
         }
 
         /*
@@ -113,20 +113,21 @@ public class Solver extends Thread {
         }*/
 
         //go through children positions
-        BestMove bestMove = new BestMove(null, Integer.MIN_VALUE);
+        BestMove bestMove = new BestMove(null, Integer.MIN_VALUE, -1);
         List<Position> moves = getPossibleMoves(board);
         for(Position move : moves) {
             makeMove(board, move, player);
             BestMove child = negamax(board, depth - 1, -player, invert(beta), invert(alpha));
+            unmakeMove(board, move);
+
             int score = -child.score;
             int winDistance = child.winDistance;
-            unmakeMove(board, move);
 
             //update best move
             if(score > bestMove.score) { //TODO: add randomness on equality
                 bestMove.position = move;
                 bestMove.score = score;
-                if(winDistance >= 0) {
+                if(winDistance > 0) {
                     bestMove.winDistance = winDistance + 1;
                 }
             }

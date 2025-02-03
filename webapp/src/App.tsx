@@ -212,6 +212,17 @@ function App() {
 export default App
 
 function createBoard(rows: number, cols: number): number[][] {
+    return [
+    //0, 1, 2, 3, 4, 5, 6
+     [0, 0, 0, 0, 0, 0, 0],   //0
+     [0, 0, 0, 0, 0, 0, 0],   //1
+     [0, 0, 0, 0, 0, 0, 0],   //2
+     [0, 0, 0, 0, 0, 0, 0],   //3
+     [0, 0, 1, 0, 0, 0, 0],   //4
+     [0, 0, -1, -1, 0, 0, 0],   //5
+    //0, 1, 2, 3, 4, 5, 6
+    ];
+
     return new Array(rows)
         .fill(0)
         .map(

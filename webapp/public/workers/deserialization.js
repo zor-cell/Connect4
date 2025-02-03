@@ -28,10 +28,7 @@ function deserializeSolverResponse(solverResponse) {
 
 function deserializeMoveResponse(moveResponse) {
     const board = deserializeBoard(moveResponse.o.f0);
-    const position = {
-        i: moveResponse.o.f1.f0,
-        j: moveResponse.o.f1.f1
-    };
+    const position = deserializePosition(moveResponse.o.f1);
     const gameState = moveResponse.o.f2.f1;
 
     return {
