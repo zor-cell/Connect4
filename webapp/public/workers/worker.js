@@ -71,6 +71,7 @@ class Worker {
         const solverRequest = await new this.SolverRequest(request.board, request.player, request.maxTime, request.maxDepth);
         const solverResponse = await this.Connector.makeBestMove(solverRequest);
 
+        console.log(solverResponse);
         self.postMessage({
             type: 'BESTMOVE',
             data: deserializeSolverResponse(solverResponse)

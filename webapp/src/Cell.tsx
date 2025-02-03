@@ -18,7 +18,8 @@ const Cell: FC<CellProps> = ({cellValue, cellPosition, currentPlayer, lastMove, 
     }
 
     return (
-        <div className={`${lastMove != null && lastMove.i == cellPosition.i && lastMove.j == cellPosition.j ? 'last-move' : ''} board-cell`} onClick={() => startMakeMove(cellPosition, currentPlayer)}>
+        <div className={`${lastMove != null && lastMove.i == cellPosition.i && lastMove.j == cellPosition.j ? 'last-move' : ''} board-cell`}
+             onClick={() => startMakeMove(cellPosition, currentPlayer)}>
             <div className={getCellFromPlayer(cellValue)}></div>
         </div>
     )

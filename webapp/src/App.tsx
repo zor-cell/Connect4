@@ -61,10 +61,11 @@ function App() {
             case 'BESTMOVE':
                 const solverResponse = payload as SolverResponse;
 
+                console.log(solverResponse)
                 setBoard(solverResponse.board);
-                setMoves(prev => [...prev, solverResponse.position]);
+                setMoves(prev => [...prev, solverResponse.bestMove.position]);
                 setGameState(solverResponse.gameState);
-                setScore(solverResponse.score);
+                setScore(solverResponse.bestMove.score);
                 togglePlayer();
                 break;
             case 'ERROR':
@@ -94,7 +95,7 @@ function App() {
 
     //trigger ai move
     useEffect(() => {
-        if(!board) return;
+        if(!board && gameState == GameState.RUNNING) return;
 
         //dont start ai move on undo
         const currentPieceCount = countPieces(board);

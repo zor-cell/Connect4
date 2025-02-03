@@ -3,6 +3,7 @@ package connect4;
 import connect4.data.BestMove;
 import connect4.data.GameState;
 import connect4.data.Position;
+import connect4.data.Scores;
 import connect4.data.requests.SolverRequest;
 
 import java.util.ArrayList;
@@ -31,12 +32,12 @@ public class Solver extends Thread {
                 {0, 0, 0, 0, 0, 0, 0},   //1
                 {0, 0, 0, 0, 0, 0, 0},   //2
                 {0, 0, 0, 0, 0, 0, 0},   //3
-                {0, 0, 0, -1, 0, 0, 0}, //4
+                {0, 0, -1, -1, 0, 0, 0}, //4
                 {0, 0, 1, 1, 0, 0, 0},   //5
                //0, 1, 2, 3, 4, 5, 6
         };
 
-        SolverRequest request = new SolverRequest(board, -1, 3000, 0);
+        SolverRequest request = new SolverRequest(board, 1, -1, 12);
         BestMove bestMove = startSolver(request);
         System.out.println(bestMove);
     }
@@ -70,15 +71,11 @@ public class Solver extends Thread {
                 System.arraycopy(config.board[i], 0, copy[i], 0, cols);
             }
 
-            int currentScore = heuristics(config.board);
-            System.out.println("static score: " + currentScore);
-
             //iterative deepening
             int maxDepth = config.maxDepth >= 1 ? config.maxDepth : 42;
             for(depth = 1;depth <= maxDepth;depth++) {
                 //the best move score is > 0 when favorable for config.player (no matter which player)
                 prevBestMove = negamax(copy, depth, config.player, Integer.MIN_VALUE, Integer.MAX_VALUE);
-                System.out.println("depth: " + depth + " " + prevBestMove);
 
                 bestMove = prevBestMove;
             }
@@ -91,8 +88,14 @@ public class Solver extends Thread {
 
     private BestMove negamax(int[][] board, int depth, int player, int alpha, int beta) throws InterruptedException {
         //break out of computation when max thinking time is surpassed
-        if(System.currentTimeMillis() - startTime > config.maxTime) {
+        if(config.maxTime >= 0 && System.currentTimeMillis() - startTime > config.maxTime) {
             throw new InterruptedException();
+        }
+
+        //check if player can easily win on next move and instantly make move
+        Position winningMove = canWinNextMove(board, player);
+        if(winningMove != null) {
+            return new BestMove(winningMove, player * Scores.WIN, 1);
         }
 
         //check if search or game is over
@@ -102,14 +105,9 @@ public class Solver extends Thread {
             return new BestMove(null, score);
         }
 
-        //check if player can easily win on next move and instantly make move
-        Position winningMove = canWinNextMove(board, player);
-        if(winningMove != null) {
-            return new BestMove(winningMove, player * 100000);
-        }
-
+        /*
         //check if opponent can easily win on next move and instantly make move
-        /*Position opponentWinningMove = canWinNextMove(board, player * -1);
+        Position opponentWinningMove = canWinNextMove(board, player * -1);
         if(opponentWinningMove != null) {
             return new BestMove(opponentWinningMove, player * heuristics(board));
         }*/
@@ -119,13 +117,18 @@ public class Solver extends Thread {
         List<Position> moves = getPossibleMoves(board);
         for(Position move : moves) {
             makeMove(board, move, player);
-            int score = -negamax(board, depth - 1, -player, invert(beta), invert(alpha)).score;
+            BestMove child = negamax(board, depth - 1, -player, invert(beta), invert(alpha));
+            int score = -child.score;
+            int winDistance = child.winDistance;
             unmakeMove(board, move);
 
             //update best move
             if(score > bestMove.score) { //TODO: add randomness on equality
                 bestMove.position = move;
                 bestMove.score = score;
+                if(winDistance >= 0) {
+                    bestMove.winDistance = winDistance + 1;
+                }
             }
 
             //alpha-beta pruning
@@ -169,6 +172,15 @@ public class Solver extends Thread {
     }
 
     private int heuristics(int[][] board) {
+        int pieces = 0;
+        for(int i = 0;i < rows;i++) {
+            for(int j = 0;j < cols;j++) {
+                if(board[i][j] != 0) {
+                    pieces++;
+                }
+            }
+        }
+
         int score = 0;
         for(int player : new int[] {-1, 1}) {
             for (int i = 0; i < rows; i++) {
@@ -200,16 +212,17 @@ public class Solver extends Thread {
                             score += player * 1000;
                         } else if(countPlayer == 3 && countEmpty == 1) {
                             //3 in row with 1 empty somewhere between
-                            score += player * 50;
+                            score += player * Scores.THREE_IN_ROW;
                         } else if(countPlayer == 2 && countEmpty == 2) {
                             //2 in row with 2 empties somewhere between
-                            score += player * 10;
+                            score += player * Scores.TWO_IN_ROW;
                         }
                     }
                 }
             }
         }
 
+        int t = rows * cols - pieces;
         return score;
     }
 

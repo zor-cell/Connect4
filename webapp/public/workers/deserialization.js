@@ -3,20 +3,26 @@ function deserializeBoard(board) {
     return objArr.map(obj => Object.values(obj));
 }
 
+function deserializePosition(position) {
+    return {
+        i: position.f0,
+        j: position.f1
+    };
+}
+
 function deserializeSolverResponse(solverResponse) {
     const board = deserializeBoard(solverResponse.o.f0);
-    const position = {
-        i: solverResponse.o.f1.f0,
-        j: solverResponse.o.f1.f1
-    };
-    const gameState = solverResponse.o.f2.f1;
-    const score = solverResponse.o.f3;
+    const gameState = solverResponse.o.f1.f1;
+    const bestMove = {
+        position: deserializePosition(solverResponse.o.f2.f0),
+        score: solverResponse.o.f2.f1,
+        winDistance: solverResponse.o.f2.f2
+    }
 
     return {
         board: board,
-        position: position,
         gameState: gameState,
-        score: score
+        bestMove: bestMove
     }
 }
 

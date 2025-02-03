@@ -1,5 +1,6 @@
 import {GameState} from "../GameState.ts";
 import {Position} from "./Position.ts";
+import {BestMove} from "./BestMove.ts";
 
 export interface WorkerResponse {
     type: 'LOAD' | 'UNDO' | 'MOVE' | 'BESTMOVE' | 'ERROR',
@@ -14,9 +15,8 @@ export interface ErrorResponse extends ResponseData {
 
 export interface SolverResponse extends ResponseData {
     board: number[][],
-    position: Position,
     gameState: GameState,
-    score: number
+    bestMove: BestMove
 }
 
 export interface MoveResponse extends ResponseData  {
