@@ -24,7 +24,8 @@ function App() {
 
     const [board, setBoard] = useState(createBoard(6, 7));
     const [gameOver, setGameOver] = useState(false);
-    const [currentPlayer, setCurrentPlayer] = useState(1);
+    const [startingPlayer, setStartingPlayer] = useState(1);
+    const [currentPlayer, setCurrentPlayer] = useState(startingPlayer);
     const [gameState, setGameState] = useState(GameState.RUNNING);
     const [moves, setMoves] = useState(new Array<Position>());
     const [score, setScore] = useState(0);
@@ -192,16 +193,33 @@ function App() {
         <div id="container" className="flex-container">
             <div id="settings" className="flex-container">
                 <div id="time-input-container" className="flex-container">
-                    <label htmlFor="max-time-input">Max Time (ms)</label>
-                    <input id="max-time-input" className="form-control" type="number" min="0" max="60000" step="500" placeholder="Time in ms" defaultValue={maxTime}
+                    <label htmlFor="max-time-input" className="text-nowrap">Max Time (ms):</label>
+                    <input id="max-time-input" className="form-control" type="number" min="0" max="60000" step="500"
+                           placeholder="Time in ms" defaultValue={maxTime}
                            onChange={(event) => {
+                               if (event.target.valueAsNumber > 60000) event.target.value = "60000";
+                               else if (event.target.valueAsNumber < 0) event.target.value = "0";
+
                                setMaxTime(event.target.valueAsNumber);
                            }}/>
                 </div>
+                {/*<div id="starting-player-container" className="flex-container">
+                    <label htmlFor="starting-player-btn" className="text-nowrap">Starting player:</label>
+                    <button id="starting-player-btn" className="btn btn-outline-primary" disabled={moves.length > 0} onClick={() => {
+                        setStartingPlayer(prev => {
+                            if (moves.length === 0) {
+                                setCurrentPlayer(prevCurrent => prevCurrent * -1);
+                                return prev * -1;
+                            }
+
+                            return prev;
+                        });
+                    }}>{startingPlayer == 1 ? "Red" : "Yellow"}</button>
+                </div>*/}
             </div>
 
             <div id="board-container">
-            <div id="buttons" className="flex-container mt-3 mb-1">
+                <div id="buttons" className="flex-container mt-3 mb-1">
                     <div>
                         {isLoadingState && <button className="btn btn-danger" onClick={abortWorker}>
                             <i className="bi bi-x-circle"></i> Abort
@@ -236,6 +254,9 @@ function App() {
             </div>
 
             <div className="flex-container mt-3 mb-4">
+                <div className="progress">
+                    <div className="progress-bar bg-info" role="progressbar"></div>
+                </div>
                 <p className="m-0"><b>Score:</b> {score}</p>
                 {winDistance >= 0 && <p className="m-0">Player {score > 0 ? "Yellow" : "Red"} wins in {winDistance} moves!</p>}
             </div>
