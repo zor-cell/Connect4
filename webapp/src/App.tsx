@@ -189,35 +189,56 @@ function App() {
     }
 
     return (
-        <div className="container">
-            <div id="board" style={{pointerEvents: gameOver ? "none" : "auto", opacity: gameOver ? 0.8 : 1}}>
-                {board.map((row, rowIndex) => (
-                    <div key={rowIndex} className="board-row">
-                        {row.map((cell, colIndex) => (
-                            <Cell key={colIndex}
-                                  cellValue={cell}
-                                  cellPosition={{i: rowIndex, j: colIndex}}
-                                  currentPlayer={currentPlayer}
-                                  lastMove={moves.length == 0 ? null : moves[moves.length - 1]}
-                                  makeMove={startMakeMove}
-                            />
-                        ))}
-                    </div>
-                ))}
-
-                {isLoadingState && !gameOver && <div id="board-loading">
-                    <img src="/loading.gif" alt="Loading" width="30" height="30"/>
-                </div>}
+        <div id="container" className="flex-container">
+            <div id="settings" className="flex-container">
+                <div id="time-input-container" className="flex-container">
+                    <label htmlFor="max-time-input">Max Time (ms)</label>
+                    <input id="max-time-input" className="form-control" type="number" min="0" max="60000" step="500" placeholder="Time in ms" defaultValue={maxTime}
+                           onChange={(event) => {
+                               setMaxTime(event.target.valueAsNumber);
+                           }}/>
+                </div>
             </div>
 
-            <button onClick={abortWorker} disabled={!isLoadingState}>Abort</button>
-            <button onClick={startUndoMove} disabled={moves.length === 0 || isLoadingState}>Undo</button>
-            <button onClick={refresh} className="btn btn-primary">New</button>
-            <input type="number" placeholder="Time in ms" defaultValue={maxTime} onChange={(event) => {
-                setMaxTime(event.target.valueAsNumber);
-            }}/>
-            <p>score: {score}</p>
-            {winDistance >= 0 && <p>Player {score > 0 ? "Yellow" : "Red"} wins in {winDistance} moves!</p>}
+            <div id="board-container">
+            <div id="buttons" className="flex-container mt-3 mb-1">
+                    <div>
+                        {isLoadingState && <button className="btn btn-danger" onClick={abortWorker}>
+                            <i className="bi bi-x-circle"></i> Abort
+                        </button>}
+                        {!isLoadingState && <button className="btn btn-primary" onClick={startUndoMove}>
+                            <i className="bi bi-arrow-left-circle"></i> Undo
+                        </button>}
+                    </div>
+                    <button className="btn btn-success" onClick={refresh} disabled={isLoadingState}>
+                        <i className="bi bi-arrow-repeat"></i> New
+                    </button>
+                </div>
+                <div id="board" style={{pointerEvents: gameOver ? "none" : "auto", opacity: gameOver ? 0.8 : 1}}>
+                    {board.map((row, rowIndex) => (
+                        <div key={rowIndex} className="board-row">
+                            {row.map((cell, colIndex) => (
+                                <Cell key={colIndex}
+                                      cellValue={cell}
+                                      cellPosition={{i: rowIndex, j: colIndex}}
+                                      currentPlayer={currentPlayer}
+                                      lastMove={moves.length == 0 ? null : moves[moves.length - 1]}
+                                      makeMove={startMakeMove}
+                                />
+                            ))}
+                        </div>
+                    ))}
+
+                    {isLoadingState && !gameOver && <div id="board-loading">
+                        <img src="/loading.gif" alt="Loading" width="30" height="30"/>
+                    </div>}
+                </div>
+            </div>
+
+            <div className="flex-container mt-3 mb-4">
+                <p className="m-0"><b>Score:</b> {score}</p>
+                {winDistance >= 0 && <p className="m-0">Player {score > 0 ? "Yellow" : "Red"} wins in {winDistance} moves!</p>}
+            </div>
 
             <ToastContainer/>
         </div>

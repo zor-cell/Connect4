@@ -2,13 +2,34 @@ body {
     margin: 0;
 }
 
-.container {
-    margin: 20px;
+.flex-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+#container {
+    margin: 20px 0 20px 0;
+}
+
+#settings {
+    gap: 20px;
+}
+
+#time-input-container {
+    gap: 2px;
+}
+
+#buttons {
+    flex-direction: row;
+    justify-content: space-between;
+
+    gap: 5px;
 }
 
 #board {
     position: relative;
-    margin: 0 auto;
     width: fit-content;
 }
 
