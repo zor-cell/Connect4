@@ -10,9 +10,13 @@ import connect4.data.responses.SolverResponse;
 public class Connector {
     public static SolverResponse makeBestMove(SolverRequest request) {
         //get best move
-        BestMove bestMove = Solver.startSolver(request);
+        //BestMove bestMove = Solver.startSolver(request);
+
+        BestMove bestMove = SolverBitboard.startSolver(request);
+        bestMove.position = Solver.getMoveFromCol(request.board, bestMove.position.j);
 
         //make best move
+        assert bestMove.position != null;
         Solver.makeMove(request.board, bestMove.position, request.player);
 
         //compute current game state

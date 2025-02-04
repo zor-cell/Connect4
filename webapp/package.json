@@ -11,6 +11,7 @@
     "build:jar": "shx mkdir -p java_build/out && find ../src/connect4 -name '*.java' > java_build/sources.txt && javac -source 1.8 -target 1.8 -cp ../lib/cheerpj-public.jar -d java_build/out @java_build/sources.txt && jar cfm public/lib/Connect4Lib.jar ../src/META-INF/MANIFEST.MF -C java_build/out . && rm -rf java_build"
   },
   "dependencies": {
+    "bootstrap": "^5.3.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-toastify": "^11.0.3"

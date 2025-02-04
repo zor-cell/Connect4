@@ -32,12 +32,13 @@ public class Solver extends Thread {
                 {0, 0, 0, 0, 0, 0, 0},   //1
                 {0, 0, 0, 0, 0, 0, 0},   //2
                 {0, 0, 0, 0, 0, 0, 0},   //3
-                {0, 0, 1, 1, 0, 0, 0}, //4
-                {0, 0, -1, -1, 0, 0, 0},   //5
+                {0, 0, 0, 0, 0, 0, 0}, //4
+                {0, 0, 0, 1, 0, 0, 0},   //5
                //0, 1, 2, 3, 4, 5, 6
         };
 
-        SolverRequest request = new SolverRequest(board, -1, -1, 3);
+        //with time = 5000, depth = 11
+        SolverRequest request = new SolverRequest(board, -1, 5000, -1);
         BestMove bestMove = startSolver(request);
         System.out.println(bestMove);
     }

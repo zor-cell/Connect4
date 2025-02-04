@@ -126,6 +126,17 @@ function App() {
         }
     }
 
+    function refresh() {
+        setBoard(createBoard(6, 7));
+        setGameOver(false);
+        setCurrentPlayer(1);
+        setGameState(GameState.RUNNING);
+        setMoves(new Array<Position>);
+        setScore(0);
+        setWinDistance(-1);
+        prevBoardRef.current = 0;
+    }
+
     function startBestMove(player: number) {
         if(gameOver || isLoading) return;
         isLoading = true;
@@ -178,7 +189,7 @@ function App() {
     }
 
     return (
-        <div>
+        <div className="container">
             <div id="board" style={{pointerEvents: gameOver ? "none" : "auto", opacity: gameOver ? 0.8 : 1}}>
                 {board.map((row, rowIndex) => (
                     <div key={rowIndex} className="board-row">
@@ -201,6 +212,7 @@ function App() {
 
             <button onClick={abortWorker} disabled={!isLoadingState}>Abort</button>
             <button onClick={startUndoMove} disabled={moves.length === 0 || isLoadingState}>Undo</button>
+            <button onClick={refresh} className="btn btn-primary">New</button>
             <input type="number" placeholder="Time in ms" defaultValue={maxTime} onChange={(event) => {
                 setMaxTime(event.target.valueAsNumber);
             }}/>

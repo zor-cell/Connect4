@@ -1,3 +1,11 @@
+body {
+    margin: 0;
+}
+
+.container {
+    margin: 20px;
+}
+
 #board {
     position: relative;
     margin: 0 auto;
@@ -26,8 +34,8 @@
     background-color: #0000ff;
     border: 1px solid black;
 
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     padding: 5px;
 
     cursor: pointer;
@@ -55,4 +63,11 @@
 
 .yellow-circle {
     background-color: #ffff00;
+}
+
+@media(max-width: 510px) {
+    .board-cell {
+        width: 40px;
+        height: 40px;
+    }
 }
