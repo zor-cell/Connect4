@@ -3,6 +3,8 @@ package connect4;
 import connect4.data.GameState;
 import connect4.data.Scores;
 
+import java.util.Arrays;
+
 public class Bitboard {
     public final int rows;
     public final int cols;
@@ -42,17 +44,19 @@ public class Bitboard {
                 //0, 1, 2, 3, 4, 5, 6
                 {0, 0, 0, 0, 0, 0, 0},   //0
                 {0, 0, 0, 0, 0, 0, 0},   //1
-                {0, 0, 0, 0, 0, 0, 0},   //2
-                {0, 0, 0, 0, 0, 0, 0},   //3
-                {0, 0, 0, 0, 0, 0, 0}, //4
-                {0, 0, 0, 0, 0, 0, 0},   //5
+                {0, 0, 1, 1, 1, 0, 0},   //2
+                {0, 0, 0, 1, 1, 0, 0},   //3
+                {0, 0, 1, 1, 1, 0, 0}, //4
+                {0, -1, 0, 0, -1, 0, 0},   //5
                 //0, 1, 2, 3, 4, 5, 6
         };
 
         Bitboard bitboard = new Bitboard(board, 1);
         System.out.println(bitboard);
 
-        int[] moves = {3, 3, 3};
+        System.out.println(bitboard.heuristics());
+
+        /*int[] moves = {3, 3, 3};
         for(int move : moves) {
             System.out.println("Move: " + move);
             if(bitboard.canMakeMove(move)) {
@@ -61,7 +65,7 @@ public class Bitboard {
             }
         }
 
-        System.out.println(bitboard.isWinning(bitboard.currentPlayer));
+        System.out.println(bitboard.isWinning(bitboard.currentPlayer));*/
     }
 
     public boolean canMakeMove(int col) {
@@ -111,8 +115,67 @@ public class Bitboard {
         if(isWinning(currentPlayer)) {
             return Scores.WIN;
         }
+        int score = 0;
 
-        return 0;
+        int[] shifts = {
+                rows + 1, //horizontal
+                1, //vertical
+                rows, //diagonal down
+                rows + 2 //diagonal up
+        };
+        long pos = currentPlayer;
+        for(int shift : shifts) {
+            //detect 3 in a row
+            long m = pos & (pos >> shift);
+            m = m & (m >> shift);
+
+            printLong(allPlayers);
+            printLong(pos);
+            printLong(m);
+            //check if the 4th sport is empty in both directions
+
+            //whenever negation is needed, all bits to the left of the 49th bit
+            //should always be 0, since they are not used in the board (only important for right check)
+            //also, the topmost row is a sentinel row, so it should also be discarded
+            long filterMask = 0b000000000000000_0111111_0111111_0111111_0111111_0111111_0111111_0111111L;
+            printLong(filterMask);
+
+            //check left of 3 in row
+            long left = (m >> shift) & ~allPlayers;
+            left &= filterMask;
+
+            printLong(left);
+
+            //check right of 3 in row
+            long right = (m << 3 * shift) & ~allPlayers;
+            right &= filterMask;
+
+            printLong(right);
+
+            if(right > 0 || left > 0) {
+                score += (Long.bitCount(right) + Long.bitCount(left));
+            }
+        }
+
+        return score;
+    }
+
+    private void printLong(long a) {
+        String str = String.format("%64s", Long.toBinaryString(a))
+                .replace(' ', '0');
+        System.out.println(str);
+    }
+
+    private void printArr(int[][] arr) {
+        String res = "";
+        for(int i = 0;i < arr.length;i++) {
+            for(int j = 0;j < arr[0].length;j++) {
+                res += arr[i][j];
+            }
+            res += "\n";
+        }
+        res += "\n";
+        System.out.println(res);
     }
 
     public GameState getGameState() {
@@ -156,7 +219,8 @@ public class Bitboard {
                 if(r == boardStr.length() - 1) r++;
 
                 String sub = boardStr.substring(l, r);
-                for(int j = 0;j < sub.length();j++) {
+                for(int j = 0;j < Math.min(sub.length(), cols);j++) {
+                    if(i >= 7) break;
                     board[i][j] = sub.charAt(j) - '0';
                 }
 
