@@ -99,6 +99,7 @@ function App() {
     //trigger ai move
     useEffect(() => {
         if(!board && gameState == GameState.RUNNING) return;
+        else if(gameState != GameState.RUNNING) return;
 
         //dont start ai move on undo
         const currentPieceCount = countPieces(board);
