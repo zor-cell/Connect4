@@ -5,7 +5,7 @@ import connect4.data.Scores;
 
 import java.util.Arrays;
 
-public class Bitboard {
+public class Bitboard implements Board {
     public final int rows;
     public final int cols;
 
@@ -44,10 +44,10 @@ public class Bitboard {
                 //0, 1, 2, 3, 4, 5, 6
                 {0, 0, 0, 0, 0, 0, 0},   //0
                 {0, 0, 0, 0, 0, 0, 0},   //1
-                {0, 0, 1, 1, 1, 0, 0},   //2
-                {0, 0, 0, 1, 1, 0, 0},   //3
-                {0, 0, 1, 1, 1, 0, 0}, //4
-                {0, -1, 0, 0, -1, 0, 0},   //5
+                {0, 0, -1, -1, 0, 0, 0},   //2
+                {0, 0, 0, 1, -1, 0, 0},   //3
+                {0, 0, 0, -1, 1, 0, 0}, //4
+                {0, 0, -1, 1, 1, 1, -1},   //5
                 //0, 1, 2, 3, 4, 5, 6
         };
 
@@ -55,17 +55,6 @@ public class Bitboard {
         System.out.println(bitboard);
 
         System.out.println(bitboard.heuristics());
-
-        /*int[] moves = {3, 3, 3};
-        for(int move : moves) {
-            System.out.println("Move: " + move);
-            if(bitboard.canMakeMove(move)) {
-                bitboard.makeMove(move);
-                System.out.println(bitboard);
-            }
-        }
-
-        System.out.println(bitboard.isWinning(bitboard.currentPlayer));*/
     }
 
     public boolean canMakeMove(int col) {
@@ -110,50 +99,85 @@ public class Bitboard {
         return false;
     }
 
-
     public int heuristics() {
+        long opponentPlayer = currentPlayer ^ allPlayers;
+
         if(isWinning(currentPlayer)) {
             return Scores.WIN;
+        } else if(isWinning(opponentPlayer)) {
+            return -Scores.WIN;
         }
-        int score = 0;
 
+        //whenever negation is needed, all bits to the left of the 42nd bit
+        //should always be 0, since they are not used in the board
+        //also, the topmost row is a sentinel row, so it should also be 0
+        long filterMask = 0b000000000000000_0111111_0111111_0111111_0111111_0111111_0111111_0111111L;
+
+        int score = 0;
         int[] shifts = {
                 rows + 1, //horizontal
                 1, //vertical
                 rows, //diagonal down
                 rows + 2 //diagonal up
         };
-        long pos = currentPlayer;
-        for(int shift : shifts) {
-            //detect 3 in a row
-            long m = pos & (pos >> shift);
-            m = m & (m >> shift);
+        long[] positions = {
+                currentPlayer,
+                opponentPlayer
+        };
+        for(long pos : positions) {
+            int player = -1;
+            if(pos == currentPlayer) {
+                player = 1;
+            }
 
-            printLong(allPlayers);
-            printLong(pos);
-            printLong(m);
-            //check if the 4th sport is empty in both directions
+            for (int shift : shifts) {
+                //detect pattern ...01110...
+                {
+                    //detect 3 in a row
+                    long t = pos & (pos >> shift);
+                    t = t & (t >> shift);
 
-            //whenever negation is needed, all bits to the left of the 49th bit
-            //should always be 0, since they are not used in the board (only important for right check)
-            //also, the topmost row is a sentinel row, so it should also be discarded
-            long filterMask = 0b000000000000000_0111111_0111111_0111111_0111111_0111111_0111111_0111111L;
-            printLong(filterMask);
+                    //check if left of 3 in row is empty
+                    long left = (t >> shift) & ~allPlayers;
+                    left &= filterMask;
 
-            //check left of 3 in row
-            long left = (m >> shift) & ~allPlayers;
-            left &= filterMask;
+                    //check right of 3 in row is empty
+                    long right = (t << 3 * shift) & ~allPlayers;
+                    right &= filterMask;
 
-            printLong(left);
+                    if (right > 0 || left > 0) {
+                        score += (Long.bitCount(right) + Long.bitCount(left)) * Scores.THREE_IN_ROW * player;
+                    }
+                }
 
-            //check right of 3 in row
-            long right = (m << 3 * shift) & ~allPlayers;
-            right &= filterMask;
+                //detect pattern ...1101...
+                /*{
+                    //detect 2 in a row
+                    long t = pos & (pos << shift);
 
-            printLong(right);
+                    //check if right of 2 in a row is player
+                    t = pos & (t << 2 * shift);
 
-            if(right > 0 || left > 0) {
-                score += (Long.bitCount(right) + Long.bitCount(left));
+                    //check if between is empty
+                    t = (t << shift) & ~allPlayers;
+                    t &= filterMask;
+
+                    if (t > 0) {
+                        score += Long.bitCount(t) * Scores.THREE_IN_ROW * player;
+                    }
+                }
+
+                //detect pattern ...1011...
+                {
+                    long t = pos & (pos >> shift);
+                    t = pos & (t >> 2 * shift);
+                    t = (t << shift) & ~allPlayers;
+                    t &= filterMask;
+
+                    if (t > 0) {
+                        score += Long.bitCount(t) * Scores.THREE_IN_ROW * player;
+                    }
+                }*/
             }
         }
 
@@ -243,7 +267,7 @@ public class Bitboard {
         String res = "";
 
         int[][] currentBoardArr = boardFromBitboard(currentPlayer);
-        res += "Current Board:\n";
+        res += "Current connect4.Board:\n";
         for(int i = 0;i < currentBoardArr.length;i++) {
             for(int j = 0;j < currentBoardArr[0].length;j++) {
                 res += currentBoardArr[i][j];
@@ -253,7 +277,7 @@ public class Bitboard {
         res += "\n";
 
         int[][] maskBoardArr = boardFromBitboard(allPlayers);
-        res += "Mask Board:\n";
+        res += "Mask connect4.Board:\n";
         for(int i = 0;i < maskBoardArr.length;i++) {
             for(int j = 0;j < maskBoardArr[0].length;j++) {
                 res += maskBoardArr[i][j];

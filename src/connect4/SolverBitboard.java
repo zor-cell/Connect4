@@ -15,6 +15,7 @@ public class SolverBitboard extends Thread {
     private final int rows;
     private final int cols;
     private long startTime;
+    private int nodesVisited = 0;
 
     private BestMove prevBestMove;
     private BestMove bestMove;
@@ -52,6 +53,7 @@ public class SolverBitboard extends Thread {
         } catch(InterruptedException e) {
             System.out.println("Main Thread interrupted");
         }
+        System.out.println("Nodes visited: " + solverThread.nodesVisited);
 
         return solverThread.getBestMove();
     }
@@ -73,7 +75,7 @@ public class SolverBitboard extends Thread {
             int maxDepth = config.maxDepth >= 1 ? config.maxDepth : 42;
             for(depth = 1;depth <= maxDepth;depth++) {
                 //the best move score is > 0 when favorable for config.player (no matter which player)
-                prevBestMove = negamax(bitboard, depth, config.player, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                prevBestMove = negamax(bitboard, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
                 bestMove = prevBestMove;
             }
@@ -84,11 +86,13 @@ public class SolverBitboard extends Thread {
         }
     }
 
-    private BestMove negamax(Bitboard board, int depth, int player, int alpha, int beta) throws InterruptedException {
+    private BestMove negamax(Bitboard board, int depth, int alpha, int beta) throws InterruptedException {
         //break out of computation when max thinking time is surpassed
         if(config.maxTime >= 0 && System.currentTimeMillis() - startTime > config.maxTime) {
             throw new InterruptedException();
         }
+
+        nodesVisited++;
 
         //check if player can easily win on next move and instantly make move
         for(int j = 0;j < board.cols;j++) {
@@ -110,7 +114,7 @@ public class SolverBitboard extends Thread {
             Bitboard moveBoard = new Bitboard(board);
             moveBoard.makeMove(move);
 
-            BestMove child = negamax(moveBoard, depth - 1, -player, invert(beta), invert(alpha));
+            BestMove child = negamax(moveBoard, depth - 1, invert(beta), invert(alpha));
             int score = -child.score;
             int winDistance = child.winDistance;
 
@@ -137,7 +141,7 @@ public class SolverBitboard extends Thread {
         List<Integer> moves = new ArrayList<>();
 
         //order columns for better pruning
-        Integer[] orderedCols = {3, 2, 4, 1, 5, 0, 6}; //todo: adjust for dynamic columns
+        Integer[] orderedCols = {3, 2, 4, 1, 5, 0, 6};
 
         //search best move from previous iteration first
         if(prevBestMove != null) {
