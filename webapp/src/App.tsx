@@ -1,6 +1,6 @@
 import './App.css'
 import {useEffect, useRef, useState} from "react";
-import Cell from "./Cell.tsx";
+import Cell from "./components/Cell.tsx";
 import {GameState} from "./classes/GameState.ts";
 import {toast, ToastContainer} from "react-toastify";
 import {Position} from "./classes/dtos/Position.ts";
@@ -13,6 +13,7 @@ import {
     SolverResponse,
     WorkerResponse
 } from "./classes/dtos/WorkerResponses.ts";
+import SliderCheckbox from "./components/SliderCheckbox.tsx";
 
 const loadingToastId = toast.loading("Loading resources...");
 initWorker();
@@ -119,6 +120,7 @@ function App() {
 
     function abortWorker() {
         worker.terminate();
+        initWorker();
 
         isLoading = false;
         setIsLoadingState(false);
@@ -204,6 +206,7 @@ function App() {
                                setMaxTime(event.target.valueAsNumber);
                            }}/>
                 </div>
+                <SliderCheckbox/>
                 {/*<div id="starting-player-container" className="flex-container">
                     <label htmlFor="starting-player-btn" className="text-nowrap">Starting player:</label>
                     <button id="starting-player-btn" className="btn btn-outline-primary" disabled={moves.length > 0} onClick={() => {
