@@ -96,7 +96,7 @@ public class Solver extends Thread {
         //check if player can easily win on next move and instantly make move
         Position winningMove = canWinNextMove(board, player);
         if(winningMove != null) {
-            return new BestMove(winningMove, Scores.WIN, 0);
+            return new BestMove(winningMove.j, Scores.WIN, 0);
         }
 
         //check if search or game is over
@@ -119,7 +119,7 @@ public class Solver extends Thread {
 
             //update best move
             if(score > bestMove.score) { //TODO: add randomness on equality
-                bestMove.position = move;
+                bestMove.move = move.j;
                 bestMove.score = score;
                 if(winDistance >= 0 && (score >= Scores.WIN || score <= -Scores.WIN)) {
                     bestMove.winDistance = winDistance + 1;
@@ -279,8 +279,8 @@ public class Solver extends Thread {
         //search best move from previous iteration first
         if(prevBestMove != null) {
             Arrays.sort(orderedCols, (a, b) -> {
-                if(a.equals(prevBestMove.position.j)) return -1;
-                if(b.equals(prevBestMove.position.j)) return 1;
+                if(a.equals(prevBestMove.move)) return -1;
+                if(b.equals(prevBestMove.move)) return 1;
 
                 return 0;
             });

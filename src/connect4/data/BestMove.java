@@ -1,16 +1,16 @@
 package connect4.data;
 
 public class BestMove {
-    public Position position;
+    public Integer move;
     public int score;
     public int winDistance;
 
-    public BestMove(Position position, int score) {
-        this(position, score, -1);
+    public BestMove(Integer move, int score) {
+        this(move, score, -1);
     }
 
-    public BestMove(Position position, int score, int winDistance) {
-        this.position = position;
+    public BestMove(Integer move, int score, int winDistance) {
+        this.move = move;
         this.score = score;
         this.winDistance = winDistance;
     }
@@ -18,7 +18,7 @@ public class BestMove {
     @Override
     public String toString() {
         return "BestMove{" +
-                "position=" + position +
+                "move=" + move +
                 ", score=" + score +
                 ", winDistance=" + winDistance +
                 '}';

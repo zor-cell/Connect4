@@ -13,11 +13,11 @@ public class Connector {
         //BestMove bestMove = Solver.startSolver(request);
 
         BestMove bestMove = SolverBitboard.startSolver(request);
-        bestMove.position = Solver.getMoveFromCol(request.board, bestMove.position.j);
+        Position position = Solver.getMoveFromCol(request.board, bestMove.move);
 
         //make best move
-        assert bestMove.position != null;
-        Solver.makeMove(request.board, bestMove.position, request.player);
+        assert position != null;
+        Solver.makeMove(request.board, position, request.player);
 
         //compute current game state
         GameState gameState = Solver.getGameState(request.board);

@@ -3,8 +3,6 @@ package connect4;
 import connect4.data.GameState;
 import connect4.data.Scores;
 
-import java.util.Arrays;
-
 public class Bitboard implements Board {
     public final int rows;
     public final int cols;
@@ -12,17 +10,21 @@ public class Bitboard implements Board {
     private long currentPlayer = 0L;
     private long allPlayers = 0L;
     private int moves = 0;
+    private int player;
 
     public Bitboard(Bitboard bitboard) {
         this.rows = bitboard.rows;
         this.cols = bitboard.cols;
         this.currentPlayer = bitboard.currentPlayer;
         this.allPlayers = bitboard.allPlayers;
+        this.moves = bitboard.moves;
+        this.player = bitboard.player;
     }
 
     public Bitboard(int[][] board, int player) {
         this.rows = board.length;
         this.cols = board[0].length;
+        this.player = player;
 
         for(int i = 0;i < rows;i++) {
             for(int j = 0;j < cols;j++) {
@@ -35,6 +37,7 @@ public class Bitboard implements Board {
                     currentPlayer |= pos;
                 }
                 allPlayers |= pos;
+                moves++;
             }
         }
     }
@@ -57,6 +60,8 @@ public class Bitboard implements Board {
         System.out.println(bitboard.heuristics());
     }
 
+    public int getMoves() {return moves;}
+
     public boolean canMakeMove(int col) {
         return (allPlayers & topMask(col)) == 0;
     }
@@ -69,16 +74,17 @@ public class Bitboard implements Board {
         allPlayers |= allPlayers + bottomMask(col);
 
         moves++;
+        player *= -1;
     }
 
     public boolean isWinningMove(int col) {
         long copy = currentPlayer;
         copy |= (allPlayers + bottomMask(col)) & columnMask(col); //why column mask???
 
-        return isWinning(copy);
+        return isWinningPosition(copy);
     }
 
-    public boolean isWinning(long pos) {
+    public boolean isWinningPosition(long pos) {
         long m;
 
         //the bitshifts to compute 4-in-row
@@ -102,9 +108,9 @@ public class Bitboard implements Board {
     public int heuristics() {
         long opponentPlayer = currentPlayer ^ allPlayers;
 
-        if(isWinning(currentPlayer)) {
+        if(isWinningPosition(currentPlayer)) {
             return Scores.WIN;
-        } else if(isWinning(opponentPlayer)) {
+        } else if(isWinningPosition(opponentPlayer)) {
             return -Scores.WIN;
         }
 
@@ -125,9 +131,11 @@ public class Bitboard implements Board {
                 opponentPlayer
         };
         for(long pos : positions) {
-            int player = -1;
-            if(pos == currentPlayer) {
-                player = 1;
+            //scores for current player are always positive
+            //and scores for opponent are always negative (no matter which players turn it is)
+            int player = 1;
+            if(pos == opponentPlayer) {
+                player = -1;
             }
 
             for (int shift : shifts) {
@@ -184,33 +192,19 @@ public class Bitboard implements Board {
         return score;
     }
 
-    private void printLong(long a) {
-        String str = String.format("%64s", Long.toBinaryString(a))
-                .replace(' ', '0');
-        System.out.println(str);
-    }
-
-    private void printArr(int[][] arr) {
-        String res = "";
-        for(int i = 0;i < arr.length;i++) {
-            for(int j = 0;j < arr[0].length;j++) {
-                res += arr[i][j];
-            }
-            res += "\n";
-        }
-        res += "\n";
-        System.out.println(res);
-    }
-
     public GameState getGameState() {
+        if(isWinningPosition(currentPlayer)) {
+            return (player == 1 ? GameState.PLAYER1 : GameState.PLAYER2);
+        } else if(isWinningPosition(currentPlayer ^ allPlayers)) {
+            return (player == 1 ? GameState.PLAYER2 : GameState.PLAYER1);
+        }
+
         if(moves == rows * cols) {
             return GameState.DRAW;
         }
 
         return GameState.RUNNING;
     }
-
-
 
     //a single 1 in the top cell of the given column
     private long topMask(int col) {
@@ -267,7 +261,7 @@ public class Bitboard implements Board {
         String res = "";
 
         int[][] currentBoardArr = boardFromBitboard(currentPlayer);
-        res += "Current connect4.Board:\n";
+        res += "Current Board:\n";
         for(int i = 0;i < currentBoardArr.length;i++) {
             for(int j = 0;j < currentBoardArr[0].length;j++) {
                 res += currentBoardArr[i][j];
@@ -277,7 +271,7 @@ public class Bitboard implements Board {
         res += "\n";
 
         int[][] maskBoardArr = boardFromBitboard(allPlayers);
-        res += "Mask connect4.Board:\n";
+        res += "Mask Board:\n";
         for(int i = 0;i < maskBoardArr.length;i++) {
             for(int j = 0;j < maskBoardArr[0].length;j++) {
                 res += maskBoardArr[i][j];
@@ -288,6 +282,24 @@ public class Bitboard implements Board {
 
 
         return res;
+    }
+
+    private void printLong(long a) {
+        String str = String.format("%64s", Long.toBinaryString(a))
+                .replace(' ', '0');
+        System.out.println(str);
+    }
+
+    private void printArr(int[][] arr) {
+        String res = "";
+        for(int i = 0;i < arr.length;i++) {
+            for(int j = 0;j < arr[0].length;j++) {
+                res += arr[i][j];
+            }
+            res += "\n";
+        }
+        res += "\n";
+        System.out.println(res);
     }
 
     static int[][] rotateCW(int[][] mat) {

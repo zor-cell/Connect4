@@ -12,8 +12,6 @@ import java.util.List;
 
 public class SolverBitboard extends Thread {
     private final SolverRequest config;
-    private final int rows;
-    private final int cols;
     private long startTime;
     private int nodesVisited = 0;
 
@@ -22,8 +20,6 @@ public class SolverBitboard extends Thread {
 
     public SolverBitboard(SolverRequest config) {
         this.config = config;
-        this.rows = config.board.length;
-        this.cols = config.board[0].length;
     }
 
     public static void main(String[] args) {
@@ -32,14 +28,14 @@ public class SolverBitboard extends Thread {
                 {0, 0, 0, 0, 0, 0, 0},   //0
                 {0, 0, 0, 0, 0, 0, 0},   //1
                 {0, 0, 0, 0, 0, 0, 0},   //2
-                {0, 0, 0, 0, 0, 0, 0},   //3
-                {0, 0, 0, 0, 0, 0, 0}, //4
-                {0, 0, 0, 1, 0, 0, 0},   //5
+                {0, 0, 0, -1, 0, 0, 0},   //3
+                {0, 0, 0, -1, 0, 0, 0}, //4
+                {0, 0, 0, 1, 1, 0, 0},   //5
                //0, 1, 2, 3, 4, 5, 6
         };
 
         //with time = 5000, depth = 11
-        SolverRequest request = new SolverRequest(board, -1, 5000, -1);
+        SolverRequest request = new SolverRequest(board, 1, 5000, -1);
         BestMove bestMove = startSolver(request);
         System.out.println(bestMove);
     }
@@ -95,9 +91,9 @@ public class SolverBitboard extends Thread {
         nodesVisited++;
 
         //check if player can easily win on next move and instantly make move
-        for(int j = 0;j < board.cols;j++) {
-            if(board.isWinningMove(j)) {
-                return new BestMove(new Position(0, j), Scores.WIN, 0);
+        for(int move = 0;move < board.cols;move++) {
+            if(board.isWinningMove(move)) {
+                return new BestMove(move, Scores.WIN - board.getMoves(), 0);
             }
         }
 
@@ -120,9 +116,9 @@ public class SolverBitboard extends Thread {
 
             //update best move
             if(score > bestMove.score) {
-                bestMove.position = new Position(0, move); //TODO: really only the column is important for the move
+                bestMove.move = move;
                 bestMove.score = score;
-                if(winDistance >= 0 && (score >= Scores.WIN || score <= -Scores.WIN)) {
+                if(winDistance >= 0 && (score >= Scores.WIN - 50 || score <= -Scores.WIN + 50)) {
                     bestMove.winDistance = winDistance + 1;
                 }
             }
@@ -146,8 +142,8 @@ public class SolverBitboard extends Thread {
         //search best move from previous iteration first
         if(prevBestMove != null) {
             Arrays.sort(orderedCols, (a, b) -> {
-                if(a.equals(prevBestMove.position.j)) return -1;
-                if(b.equals(prevBestMove.position.j)) return 1;
+                if(a.equals(prevBestMove.move)) return -1;
+                if(b.equals(prevBestMove.move)) return 1;
 
                 return 0;
             });
