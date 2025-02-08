@@ -45,16 +45,16 @@ public class Bitboard implements Board {
     public static void main(String[] args) {
         int[][] board = {
                 //0, 1, 2, 3, 4, 5, 6
-                {0, 0, 0, 0, 0, 0, 0},   //0
-                {0, 0, 0, 0, 0, 0, 0},   //1
-                {0, 0, -1, -1, 0, 0, 0},   //2
-                {0, 0, 0, 1, -1, 0, 0},   //3
-                {0, 0, 0, -1, 1, 0, 0}, //4
+                {0, 0, 0, 1, 0, 0, 0},   //0
+                {0, 0, 0, 1, 0, 0, 0},   //1
+                {0, 0, 0, -1, 0, -1, 0},   //2
+                {0, 0, 0, 1, 0, -1, 0},   //3
+                {0, 0, 0, -1, 0, 1, 0}, //4
                 {0, 0, -1, 1, 1, 1, -1},   //5
                 //0, 1, 2, 3, 4, 5, 6
         };
 
-        Bitboard bitboard = new Bitboard(board, 1);
+        Bitboard bitboard = new Bitboard(board, -1);
         System.out.println(bitboard);
 
         System.out.println(bitboard.heuristics());
@@ -108,11 +108,11 @@ public class Bitboard implements Board {
     public int heuristics() {
         long opponentPlayer = currentPlayer ^ allPlayers;
 
-        if(isWinningPosition(currentPlayer)) {
+        /*if(isWinningPosition(currentPlayer)) {
             return Scores.WIN;
         } else if(isWinningPosition(opponentPlayer)) {
             return -Scores.WIN;
-        }
+        }*/
 
         //whenever negation is needed, all bits to the left of the 42nd bit
         //should always be 0, since they are not used in the board
@@ -145,47 +145,36 @@ public class Bitboard implements Board {
                     long t = pos & (pos >> shift);
                     t = t & (t >> shift);
 
-                    //check if left of 3 in row is empty
-                    long left = (t >> shift) & ~allPlayers;
-                    left &= filterMask;
+                    long left = (t >> shift) & ~allPlayers; //check if left of 3 in row is empty
+                    left &= filterMask; //filter out invalid bits
 
-                    //check right of 3 in row is empty
-                    long right = (t << 3 * shift) & ~allPlayers;
-                    right &= filterMask;
+                    long right = (t << 3 * shift) & ~allPlayers; //check right of 3 in row is empty
+                    right &= filterMask; //filter out invalid bits
 
-                    if (right > 0 || left > 0) {
-                        score += (Long.bitCount(right) + Long.bitCount(left)) * Scores.THREE_IN_ROW * player;
+                    if (left > 0 || right > 0) {
+                        score += (Long.bitCount(left) + Long.bitCount(right)) * Scores.THREE_IN_ROW * player;
                     }
                 }
 
-                //detect pattern ...1101...
-                /*{
-                    //detect 2 in a row
-                    long t = pos & (pos << shift);
-
-                    //check if right of 2 in a row is player
-                    t = pos & (t << 2 * shift);
-
-                    //check if between is empty
-                    t = (t << shift) & ~allPlayers;
-                    t &= filterMask;
-
-                    if (t > 0) {
-                        score += Long.bitCount(t) * Scores.THREE_IN_ROW * player;
-                    }
-                }
-
-                //detect pattern ...1011...
+                //detect pattern ...1101... | ...1011
                 {
+                    //detect 2 in a row
                     long t = pos & (pos >> shift);
-                    t = pos & (t >> 2 * shift);
-                    t = (t << shift) & ~allPlayers;
-                    t &= filterMask;
 
-                    if (t > 0) {
-                        score += Long.bitCount(t) * Scores.THREE_IN_ROW * player;
+                    //pattern ...1011...
+                    long left = pos & (t << 3 * shift); //check if left of 2 in a row is player
+                    left = (left >> shift) & ~allPlayers; //check if between is empty
+                    left &= filterMask; //filter out invalid bits
+
+                    //pattern ...1101...
+                    long right = pos & (t >> 2 * shift); //check if right of 2 in a row is player
+                    right = (right << shift) & ~allPlayers; //check if between is empty
+                    right &= filterMask; //filter out invalid bits
+
+                    if (left > 0 || right > 0) {
+                        score += (Long.bitCount(left) + Long.bitCount(right)) * Scores.THREE_IN_ROW * player;
                     }
-                }*/
+                }
             }
         }
 
