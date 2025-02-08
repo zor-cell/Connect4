@@ -11,18 +11,19 @@ function deserializePosition(position) {
 }
 
 function deserializeSolverResponse(solverResponse) {
+    console.log(solverResponse);
     const board = deserializeBoard(solverResponse.o.f0);
     const gameState = solverResponse.o.f1.f1;
-    const bestMove = {
-        position: deserializePosition(solverResponse.o.f2.f0),
-        score: solverResponse.o.f2.f1,
-        winDistance: solverResponse.o.f2.f2
-    }
+    const position = deserializePosition(solverResponse.o.f2);
+    const score = solverResponse.o.f3;
+    const winDistance = solverResponse.o.f4;
 
     return {
         board: board,
         gameState: gameState,
-        bestMove: bestMove
+        position: position,
+        score: score,
+        winDistance: winDistance
     }
 }
 

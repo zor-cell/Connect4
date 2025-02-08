@@ -64,12 +64,11 @@ function App() {
             case 'BESTMOVE':
                 const solverResponse = payload as SolverResponse;
 
-                console.log(solverResponse)
                 setBoard(solverResponse.board);
-                setMoves(prev => [...prev, solverResponse.bestMove.position]);
+                setMoves(prev => [...prev, solverResponse.position]);
                 setGameState(solverResponse.gameState);
-                setScore(solverResponse.bestMove.score);
-                setWinDistance(solverResponse.bestMove.winDistance);
+                setScore(solverResponse.score);
+                setWinDistance(solverResponse.winDistance);
                 togglePlayer();
                 break;
             case 'ERROR':

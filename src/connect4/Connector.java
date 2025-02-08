@@ -7,6 +7,10 @@ import connect4.data.requests.UndoRequest;
 import connect4.data.responses.MoveResponse;
 import connect4.data.responses.SolverResponse;
 
+/**
+ * This class serves as the interaction interface between a frontend worker and
+ * Java methods.
+ */
 public class Connector {
     public static SolverResponse makeBestMove(SolverRequest request) {
         //get best move
@@ -14,15 +18,15 @@ public class Connector {
 
         BestMove bestMove = SolverBitboard.startSolver(request);
         Position position = Solver.getMoveFromCol(request.board, bestMove.move);
+        assert position != null;
 
         //make best move
-        assert position != null;
         Solver.makeMove(request.board, position, request.player);
 
         //compute current game state
         GameState gameState = Solver.getGameState(request.board);
 
-        return new SolverResponse(request.board, gameState, bestMove);
+        return new SolverResponse(request.board, gameState, position, bestMove.score, bestMove.winDistance);
     }
 
     public static MoveResponse makeMove(MoveRequest request) {

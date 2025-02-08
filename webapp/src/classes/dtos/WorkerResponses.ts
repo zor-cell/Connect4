@@ -16,7 +16,9 @@ export interface ErrorResponse extends ResponseData {
 export interface SolverResponse extends ResponseData {
     board: number[][],
     gameState: GameState,
-    bestMove: BestMove
+    position: Position,
+    score: number,
+    winDistance: number
 }
 
 export interface MoveResponse extends ResponseData  {
