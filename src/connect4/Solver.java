@@ -38,7 +38,7 @@ public class Solver extends Thread {
         };
 
         //with time = 5000, depth = 11
-        SolverRequest request = new SolverRequest(board, -1, 5000, -1);
+        SolverRequest request = new SolverRequest(board, -1, 5000, -1, 0);
         BestMove bestMove = startSolver(request);
         System.out.println(bestMove);
     }

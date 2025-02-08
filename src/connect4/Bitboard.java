@@ -241,8 +241,20 @@ public class Bitboard implements Board {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Bitboard)) return false;
+        Bitboard bitboard = (Bitboard) o;
+        return hashCode() == bitboard.hashCode();
+    }
+
+    @Override
     public int hashCode() {
         return (int) (currentPlayer + allPlayers);
+    }
+
+    public long getHash() {
+        return currentPlayer + allPlayers;
     }
 
     @Override

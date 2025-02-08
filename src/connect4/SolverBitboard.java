@@ -2,24 +2,28 @@ package connect4;
 
 import connect4.data.BestMove;
 import connect4.data.GameState;
-import connect4.data.Position;
 import connect4.data.Scores;
 import connect4.data.requests.SolverRequest;
+import connect4.table.TableEntry;
+import connect4.table.TableFlag;
+import connect4.table.TranspositionTable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class SolverBitboard extends Thread {
     private final SolverRequest config;
     private long startTime;
     private int nodesVisited = 0;
+    private int tableStored = 0;
 
+
+    private final TranspositionTable table;
     private BestMove prevBestMove;
     private BestMove bestMove;
 
     public SolverBitboard(SolverRequest config) {
         this.config = config;
+        this.table = new TranspositionTable(Math.max(config.tableSize, 0));
     }
 
     public static void main(String[] args) {
@@ -28,14 +32,15 @@ public class SolverBitboard extends Thread {
                 {0, 0, 0, 0, 0, 0, 0},   //0
                 {0, 0, 0, 0, 0, 0, 0},   //1
                 {0, 0, 0, 0, 0, 0, 0},   //2
-                {0, 0, 0, -1, 0, 0, 0},   //3
-                {0, 0, 0, -1, 0, 0, 0}, //4
-                {0, 0, 0, 1, 1, 0, 0},   //5
+                {0, 0, 0, 0, 0, 0, 0},   //3
+                {0, 0, 0, 0, 0, 0, 0}, //4
+                {0, 0, 0, 1, 0, 0, 0},   //5
                //0, 1, 2, 3, 4, 5, 6
         };
 
         //with time = 5000, depth = 11
-        SolverRequest request = new SolverRequest(board, 1, 5000, -1);
+        //depth =
+        SolverRequest request = new SolverRequest(board, 1, 10000, -1, 1_000_000);
         BestMove bestMove = startSolver(request);
         System.out.println(bestMove);
     }
@@ -49,7 +54,8 @@ public class SolverBitboard extends Thread {
         } catch(InterruptedException e) {
             System.out.println("Main Thread interrupted");
         }
-        System.out.println("Nodes visited: " + solverThread.nodesVisited);
+        System.out.println("Nodes looked up in Transposition table: " + String.format("%,d", solverThread.tableStored));
+        System.out.println("Nodes visited: " + String.format("%,d", solverThread.nodesVisited));
 
         return solverThread.getBestMove();
     }
@@ -83,9 +89,29 @@ public class SolverBitboard extends Thread {
     }
 
     private BestMove negamax(Bitboard board, int depth, int alpha, int beta) throws InterruptedException {
+        int alphaOrigin = alpha;
+
         //break out of computation when max thinking time is surpassed
         if(config.maxTime >= 0 && System.currentTimeMillis() - startTime > config.maxTime) {
             throw new InterruptedException();
+        }
+
+        //transposition table lookup
+        TableEntry storedEntry = table.get(board.getHash());
+        if(storedEntry != null && storedEntry.depth >= depth) {
+            tableStored++;
+
+            if(storedEntry.flag == TableFlag.EXACT) {
+                return storedEntry.bestMove;
+            } else if(storedEntry.flag == TableFlag.LOWER_BOUND) {
+                alpha = Math.max(alpha, storedEntry.bestMove.score);
+            } else if(storedEntry.flag == TableFlag.UPPER_BOUND) {
+                beta = Math.min(beta, storedEntry.bestMove.score);
+            }
+
+            if(alpha > beta) {
+                return storedEntry.bestMove;
+            }
         }
 
         nodesVisited++;
@@ -129,6 +155,16 @@ public class SolverBitboard extends Thread {
                 break;
             }
         }
+
+        //save result to transposition table
+        TableFlag flag = TableFlag.EXACT;
+        if(bestMove.score <= alphaOrigin) {
+            flag = TableFlag.UPPER_BOUND;
+        } else if(bestMove.score >= beta) {
+            flag = TableFlag.LOWER_BOUND;
+        }
+        TableEntry saveEntry = new TableEntry(board.getHash(), depth, flag, bestMove);
+        table.put(saveEntry);
 
         return bestMove;
     }

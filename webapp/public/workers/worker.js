@@ -68,7 +68,7 @@ class Worker {
     static async makeBestMove(request) {
         this.checkValidLib();
 
-        const solverRequest = await new this.SolverRequest(request.board, request.player, request.maxTime, request.maxDepth);
+        const solverRequest = await new this.SolverRequest(request.board, request.player, request.maxTime, request.maxDepth, request.tableSize);
         const solverResponse = await this.Connector.makeBestMove(solverRequest);
 
         self.postMessage({

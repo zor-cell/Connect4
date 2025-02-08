@@ -149,7 +149,8 @@ function App() {
             board: board,
             player: player,
             maxTime: maxTime,
-            maxDepth: 0
+            maxDepth: -1,
+            tableSize: 100_000
         };
         const workerRequest: WorkerRequest = {
             type: 'BESTMOVE',
@@ -261,7 +262,7 @@ function App() {
                     <div className="progress-bar bg-info" role="progressbar"></div>
                 </div>
                 <p className="m-0"><b>Score:</b> {score}</p>
-                {winDistance >= 0 && <p className="m-0">Player {score > 0 ? "Yellow" : "Red"} wins in {winDistance} moves!</p>}
+                {winDistance >= 0 && <p className="m-0">Player {score > 0 ? "Yellow" : "Red"} wins in {Math.ceil(winDistance / 2)} moves!</p>}
             </div>
 
             <ToastContainer/>

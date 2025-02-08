@@ -11,7 +11,8 @@ export interface SolverRequest extends RequestData {
     board: number[][],
     player: number,
     maxTime: number,
-    maxDepth: number
+    maxDepth: number,
+    tableSize: number
 }
 
 export interface MoveRequest extends RequestData {

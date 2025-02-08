@@ -11,7 +11,6 @@ function deserializePosition(position) {
 }
 
 function deserializeSolverResponse(solverResponse) {
-    console.log(solverResponse);
     const board = deserializeBoard(solverResponse.o.f0);
     const gameState = solverResponse.o.f1.f1;
     const position = deserializePosition(solverResponse.o.f2);
