@@ -42,7 +42,7 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
                 </select>
             </div>}
             {isAi && hasStart && <button className="btn btn-primary mt-2" onClick={onStart}>
-                <i className="bi bi-play-circle"></i> Start
+                <i className="bi bi-play-circle"></i> Play
             </button>}
         </div>
     );
