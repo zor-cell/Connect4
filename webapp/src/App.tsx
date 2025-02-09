@@ -23,13 +23,12 @@ let isLoading: boolean = true;
 function App() {
     const [player1, setPlayer1] = useState<Player | null>(null);
     const [player2, setPlayer2] = useState<Player | null>(null);
+    const [currentPlayer, setCurrentPlayer] = useState(1);
+    const [lastAiPlayer, setLastAiPlayer] = useState<number | null>(null);
 
     const [isLoadingState, setIsLoadingState] = useState(isLoading);
-
     const [board, setBoard] = useState(createBoard(6, 7));
     const [gameOver, setGameOver] = useState(false);
-    const [startingPlayer, setStartingPlayer] = useState(1);
-    const [currentPlayer, setCurrentPlayer] = useState(startingPlayer);
     const [gameState, setGameState] = useState(GameState.RUNNING);
     const [moves, setMoves] = useState(new Array<Position>());
     const [score, setScore] = useState(0);
@@ -72,6 +71,7 @@ function App() {
                 setGameState(solverResponse.gameState);
                 setScore(solverResponse.score);
                 setWinDistance(solverResponse.winDistance);
+                setLastAiPlayer(currentPlayer);
                 togglePlayer();
                 break;
             case 'ERROR':
@@ -199,6 +199,20 @@ function App() {
         worker.postMessage(workerRequest);
     }
 
+    function getWinner() {
+        if(lastAiPlayer == null) return;
+
+        if(lastAiPlayer == 1) {
+            if(score > 0) return 1;
+            else if(score < 0) return -1;
+        } else if(lastAiPlayer == -1) {
+            if(score > 0) return -1;
+            else if(score < 0) return 1;
+        }
+
+        return 0;
+    }
+
     return (
         <div id="container" className="flex-container">
             <div id="settings-container" className="flex-container flex-row align-items-start">
@@ -241,11 +255,11 @@ function App() {
                 </div>
             </div>
 
-            <div className="flex-container mt-3 mb-4">
+            {<div className="flex-container mt-3 mb-4">
                 <p className="m-0"><b>Score:</b> {score}</p>
-                {winDistance >= 0 && <p className="m-0">Player {score > 0 ? "Red" : "Yellow"} wins
+                {winDistance >= 0 && <p className="m-0">Player {getWinner() == 1 ? "Red" : "Yellow"} wins
                     in {Math.ceil(winDistance / 2)} moves!</p>}
-            </div>
+            </div>}
 
             <ToastContainer/>
         </div>
