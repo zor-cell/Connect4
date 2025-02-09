@@ -16,5 +16,7 @@ export interface SliderCheckBoxProps {
 export interface PlayerSettingsProps {
     color: string;
     defaultIsAi: boolean;
+    hasStart: boolean;
     setPlayer: any;
+    onStart: any;
 }

@@ -199,23 +199,11 @@ function App() {
         worker.postMessage(workerRequest);
     }
 
-    function getWinningPlayer() {
-        if(currentPlayer == 1) {
-            if(score > 0) return 1;
-            else if(score < 0) return -1;
-        } else if(currentPlayer == -1) {
-            if(score > 0) return -1;
-            else if(score < 0) return 1;
-        }
-
-        return 0;
-    }
-
     return (
         <div id="container" className="flex-container">
             <div id="settings-container" className="flex-container flex-row align-items-start">
-                <PlayerSettings color={"Red"} defaultIsAi={false} setPlayer={setPlayer1}/>
-                <PlayerSettings color={"Yellow"} defaultIsAi={true} setPlayer={setPlayer2}/>
+                <PlayerSettings color={"Red"} defaultIsAi={false} hasStart={moves.length === 0} setPlayer={setPlayer1} onStart={() => startBestMove(1, player1)}/>
+                <PlayerSettings color={"Yellow"} defaultIsAi={true} hasStart={false} setPlayer={setPlayer2} onStart={null}/>
             </div>
 
             <div id="board-container">
@@ -255,7 +243,7 @@ function App() {
 
             <div className="flex-container mt-3 mb-4">
                 <p className="m-0"><b>Score:</b> {score}</p>
-                {winDistance >= 0 && <p className="m-0">Player {getWinningPlayer() == 1 ? "Red" : "Yellow"} wins
+                {winDistance >= 0 && <p className="m-0">Player {score > 0 ? "Red" : "Yellow"} wins
                     in {Math.ceil(winDistance / 2)} moves!</p>}
             </div>
 

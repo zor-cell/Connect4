@@ -5,7 +5,7 @@ import "./PlayerSettings.css";
 import {GameState} from "../classes/GameState.ts";
 import {Player} from "../classes/Player.ts";
 
-const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, setPlayer}) => {
+const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, setPlayer, onStart}) => {
     const [isAi, setIsAi] = useState(defaultIsAi);
     const [maxTime, setMaxTime] = useState(3000);
 
@@ -41,6 +41,9 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, setPlayer}
                     <option value={"v2"}>Bitboard</option>
                 </select>
             </div>}
+            {isAi && hasStart && <button className="btn btn-primary mt-2" onClick={onStart}>
+                <i className="bi bi-play-circle"></i> Start
+            </button>}
         </div>
     );
 };
