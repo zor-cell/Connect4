@@ -215,7 +215,7 @@ function App() {
 
     return (
         <div id="container" className="flex-container">
-            <div id="settings-container" className="flex-container flex-row align-items-start">
+            <div id="settings-container" className="flex-container">
                 <PlayerSettings color={"Red"} defaultIsAi={false} hasStart={moves.length === 0} setPlayer={setPlayer1} onStart={() => startBestMove(1, player1)}/>
                 <PlayerSettings color={"Yellow"} defaultIsAi={true} hasStart={false} setPlayer={setPlayer2} onStart={null}/>
             </div>
