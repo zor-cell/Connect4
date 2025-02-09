@@ -13,15 +13,6 @@ body {
     margin: 20px 0 20px 0;
 }
 
-#settings {
-    gap: 10px;
-}
-
-#time-input-container {
-    flex-direction: row;
-    gap: 10px;
-}
-
 #starting-player-container {
     flex-direction: row;
     gap: 10px;

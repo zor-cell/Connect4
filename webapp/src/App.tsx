@@ -13,15 +13,18 @@ import {
     SolverResponse,
     WorkerResponse
 } from "./classes/dtos/WorkerResponses.ts";
-import SliderCheckbox from "./components/SliderCheckbox.tsx";
+import PlayerSettings from "./components/PlayerSettings.tsx";
+import {Player} from "./classes/Player.ts";
 
 const loadingToastId = toast.loading("Loading resources...");
 initWorker();
 
 let isLoading: boolean = true;
 function App() {
+    const [player1, setPlayer1] = useState<Player | null>(null);
+    const [player2, setPlayer2] = useState<Player | null>(null);
+
     const [isLoadingState, setIsLoadingState] = useState(isLoading);
-    const [maxTime, setMaxTime] = useState(3000);
 
     const [board, setBoard] = useState(createBoard(6, 7));
     const [gameOver, setGameOver] = useState(false);
@@ -88,7 +91,7 @@ function App() {
             toast.info("The game is a draw!");
             setGameOver(true);
         } else if(gameState === GameState.PLAYER1 || gameState === GameState.PLAYER2) {
-            let winner = gameState === GameState.PLAYER1 ? "1" : "2";
+            let winner = gameState === GameState.PLAYER1 ? "Red" : "Yellow";
             toast.info(`Player ${winner} won!`);
             setGameOver(true);
         } else {
@@ -98,8 +101,10 @@ function App() {
 
     //trigger ai move
     useEffect(() => {
-        if(!board && gameState == GameState.RUNNING) return;
-        else if(gameState != GameState.RUNNING) return;
+        if(player1 == null || player2 == null) return;
+
+        //dont start ai move when game is over
+        if(gameState != GameState.RUNNING) return;
 
         //dont start ai move on undo
         const currentPieceCount = countPieces(board);
@@ -107,11 +112,13 @@ function App() {
         prevBoardRef.current = currentPieceCount;
         if(currentPieceCount < previousPieceCount) return;
 
-        //only start ai move when player is -1
-        if(currentPlayer && currentPlayer == -1) {
-            startBestMove(currentPlayer);
+        //start ai move
+        if(currentPlayer == 1 && player1.isAi) {
+            startBestMove(currentPlayer, player1);
+        } else if(currentPlayer == -1 && player2.isAi) {
+            startBestMove(currentPlayer, player2);
         }
-    }, [board, currentPlayer]);
+    }, [currentPlayer]);
 
     function togglePlayer() {
         setCurrentPlayer(prev => prev === 1 ? -1 : 1);
@@ -140,7 +147,7 @@ function App() {
         prevBoardRef.current = 0;
     }
 
-    function startBestMove(player: number) {
+    function startBestMove(player: number, playerSettings: Player) {
         if(gameOver || isLoading) return;
         isLoading = true;
         setIsLoadingState(true);
@@ -148,7 +155,7 @@ function App() {
         const solverRequest: SolverRequest = {
             board: board,
             player: player,
-            maxTime: maxTime,
+            maxTime: playerSettings.maxTime,
             maxDepth: -1,
             tableSize: 100_000
         };
@@ -192,34 +199,23 @@ function App() {
         worker.postMessage(workerRequest);
     }
 
+    function getWinningPlayer() {
+        if(currentPlayer == 1) {
+            if(score > 0) return 1;
+            else if(score < 0) return -1;
+        } else if(currentPlayer == -1) {
+            if(score > 0) return -1;
+            else if(score < 0) return 1;
+        }
+
+        return 0;
+    }
+
     return (
         <div id="container" className="flex-container">
-            <div id="settings" className="flex-container">
-                <div id="time-input-container" className="flex-container">
-                    <label htmlFor="max-time-input" className="text-nowrap">Max Time (ms):</label>
-                    <input id="max-time-input" className="form-control" type="number" min="0" max="60000" step="500"
-                           placeholder="Time in ms" defaultValue={maxTime}
-                           onChange={(event) => {
-                               if (event.target.valueAsNumber > 60000) event.target.value = "60000";
-                               else if (event.target.valueAsNumber < 0) event.target.value = "0";
-
-                               setMaxTime(event.target.valueAsNumber);
-                           }}/>
-                </div>
-                <SliderCheckbox/>
-                {/*<div id="starting-player-container" className="flex-container">
-                    <label htmlFor="starting-player-btn" className="text-nowrap">Starting player:</label>
-                    <button id="starting-player-btn" className="btn btn-outline-primary" disabled={moves.length > 0} onClick={() => {
-                        setStartingPlayer(prev => {
-                            if (moves.length === 0) {
-                                setCurrentPlayer(prevCurrent => prevCurrent * -1);
-                                return prev * -1;
-                            }
-
-                            return prev;
-                        });
-                    }}>{startingPlayer == 1 ? "Red" : "Yellow"}</button>
-                </div>*/}
+            <div id="settings-container" className="flex-container flex-row align-items-start">
+                <PlayerSettings color={"Red"} defaultIsAi={false} setPlayer={setPlayer1}/>
+                <PlayerSettings color={"Yellow"} defaultIsAi={true} setPlayer={setPlayer2}/>
             </div>
 
             <div id="board-container">
@@ -258,11 +254,9 @@ function App() {
             </div>
 
             <div className="flex-container mt-3 mb-4">
-                <div className="progress">
-                    <div className="progress-bar bg-info" role="progressbar"></div>
-                </div>
                 <p className="m-0"><b>Score:</b> {score}</p>
-                {winDistance >= 0 && <p className="m-0">Player {score > 0 ? "Yellow" : "Red"} wins in {Math.ceil(winDistance / 2)} moves!</p>}
+                {winDistance >= 0 && <p className="m-0">Player {getWinningPlayer() == 1 ? "Red" : "Yellow"} wins
+                    in {Math.ceil(winDistance / 2)} moves!</p>}
             </div>
 
             <ToastContainer/>

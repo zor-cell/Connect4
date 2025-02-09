@@ -7,3 +7,14 @@ export interface CellProps {
     lastMove: Position;
     makeMove: (position: Position, player: number) => void;
 }
+
+export interface SliderCheckBoxProps {
+    isChecked: boolean;
+    setIsChecked: any;
+}
+
+export interface PlayerSettingsProps {
+    color: string;
+    defaultIsAi: boolean;
+    setPlayer: any;
+}

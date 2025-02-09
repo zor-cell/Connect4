@@ -1,11 +1,17 @@
 import './SliderCheckbox.css'
+import {FC} from "react";
+import {SliderCheckBoxProps} from "../classes/Props.ts";
 
-const SliderCheckbox = () => {
+const SliderCheckbox: FC<SliderCheckBoxProps> = ({isChecked, setIsChecked}) => {
     return (
         <div className="button">
-            <input type="checkbox" className="checkbox" defaultChecked={true}/>
+            <input type="checkbox"
+                   className="checkbox"
+                   defaultChecked={isChecked}
+                   onChange={(event) => {
+                       setIsChecked(event.target.checked);
+                   }}/>
             <div className="knobs"></div>
-            <div className="layer"></div>
         </div>
     )
 }
