@@ -40,7 +40,7 @@ public class SolverBitboard extends Thread {
 
         //with time = 5000, depth = 11
         //depth =
-        SolverRequest request = new SolverRequest(board, 1, 10000, -1, 1_000_000);
+        SolverRequest request = new SolverRequest(board, 1, 10000, -1, 1);
         BestMove bestMove = startSolver(request);
         System.out.println(bestMove);
     }

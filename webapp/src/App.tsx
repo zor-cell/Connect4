@@ -157,7 +157,7 @@ function App() {
             player: player,
             maxTime: playerSettings.maxTime,
             maxDepth: -1,
-            tableSize: 100_000
+            tableSize: playerSettings.maxMemory
         };
         const workerRequest: WorkerRequest = {
             type: 'BESTMOVE',
@@ -233,7 +233,7 @@ function App() {
             <div id="board-container">
                 <div id="buttons" className="flex-container mt-3 mb-1">
                     <div>
-                        {isLoadingState && <button className="btn btn-danger" onClick={abortWorker}>
+                        {isLoadingState && <button className="btn btn-danger" onClick={abortWorker}> {/*TODO: only show abort when ai is thinking*/}
                             <i className="bi bi-x-circle"></i> Abort
                         </button>}
                         {!isLoadingState && <button className="btn btn-primary" onClick={startUndoMove}>

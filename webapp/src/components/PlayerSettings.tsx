@@ -8,14 +8,16 @@ import {Player} from "../classes/Player.ts";
 const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, setPlayer, onStart}) => {
     const [isAi, setIsAi] = useState(defaultIsAi);
     const [maxTime, setMaxTime] = useState(3000);
+    const [maxMemory, setMaxMemory] = useState(16);
 
     useEffect(() => {
         let player: Player = {
             isAi: isAi,
-            maxTime: maxTime
+            maxTime: maxTime,
+            maxMemory: maxMemory
         };
         setPlayer(player);
-    }, [isAi, maxTime]);
+    }, [isAi, maxTime, maxMemory]);
 
     return (
         <div id="settings" className="flex-container gap-2 m-2 p-2">
@@ -33,6 +35,17 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
 
                        setMaxTime(event.target.valueAsNumber);
                    }}/>
+            </div>}
+            {isAi && <div className="grid-container">
+                <label htmlFor="max-memory-input">Table Size (MB)</label>
+                <input id="max-memory-input" type="number" min="0" max="64" step="1"
+                       placeholder="Table size in MB" defaultValue={maxMemory}
+                       onChange={(event) => {
+                           if (event.target.valueAsNumber > 64) event.target.value = "64";
+                           else if (event.target.valueAsNumber < 0) event.target.value = "0";
+
+                           setMaxMemory(event.target.valueAsNumber);
+                       }}/>
             </div>}
             {isAi && <div className="grid-container">
                 <label htmlFor="version-select">Version</label>
