@@ -1,4 +1,5 @@
 import {Position} from "./Position.ts";
+import {Version} from "../Version.ts";
 
 export interface WorkerRequest {
     type: 'LOAD' | 'UNDO' | 'MOVE' | 'BESTMOVE',
@@ -12,7 +13,8 @@ export interface SolverRequest extends RequestData {
     player: number,
     maxTime: number,
     maxDepth: number,
-    tableSize: number
+    tableSize: number,
+    version: Version
 }
 
 export interface MoveRequest extends RequestData {

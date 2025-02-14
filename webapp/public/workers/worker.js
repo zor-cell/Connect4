@@ -36,9 +36,10 @@ class Worker {
                     break;
             }
         } catch(error) {
+            console.error(error)
             self.postMessage({
                 type: 'ERROR',
-                data: error.message
+                data: error.message ? error.message : error
             })
         }
     }
@@ -56,6 +57,7 @@ class Worker {
         this.SolverRequest = await this.lib.connect4.data.requests.SolverRequest;
         this.MoveRequest = await this.lib.connect4.data.requests.MoveRequest;
         this.UndoRequest = await this.lib.connect4.data.requests.UndoRequest;
+        this.Version = await this.lib.connect4.data.Version;
 
         this.loaded = true;
 
@@ -65,10 +67,23 @@ class Worker {
         });
     }
 
+    static mapVersion(version) {
+        if(version === 0) {
+            return this.Version.V1_0;
+        } else if(version === 1) {
+            return this.Version.V1_1;
+        } else if(version === 2) {
+            return this.Version.V2_0;
+        } else if(version === 3) {
+            return this.Version.V2_1;
+        }
+    }
+
     static async makeBestMove(request) {
         this.checkValidLib();
 
-        const solverRequest = await new this.SolverRequest(request.board, request.player, request.maxTime, request.maxDepth, request.tableSize);
+        const version = this.mapVersion(request.version);
+        const solverRequest = await new this.SolverRequest(request.board, request.player, request.maxTime, request.maxDepth, request.tableSize, version);
         const solverResponse = await this.Connector.makeBestMove(solverRequest);
 
         self.postMessage({

@@ -15,6 +15,7 @@ import {
 } from "./classes/dtos/WorkerResponses.ts";
 import PlayerSettings from "./components/PlayerSettings.tsx";
 import {Player} from "./classes/Player.ts";
+import {Version} from "./classes/Version.ts";
 
 const loadingToastId = toast.loading("Loading resources...");
 initWorker();
@@ -157,7 +158,8 @@ function App() {
             player: player,
             maxTime: playerSettings.maxTime,
             maxDepth: -1,
-            tableSize: playerSettings.maxMemory
+            tableSize: playerSettings.maxMemory,
+            version: playerSettings.version
         };
         const workerRequest: WorkerRequest = {
             type: 'BESTMOVE',

@@ -50,14 +50,18 @@ public interface Board {
     static Board getInstance(Board board) {
         if(board instanceof Bitboard) {
             return new Bitboard((Bitboard) board);
+        } else if(board instanceof SimpleBoard) {
+            return new SimpleBoard((SimpleBoard) board);
         }
 
         return null;
     }
 
     static Board getInstance(SolverRequest request) {
-        if(request.version == Version.V2_1) {
+        if(request.version == Version.V2_0 || request.version == Version.V2_1) {
             return new Bitboard(request.board, request.player);
+        } else if(request.version == Version.V1_0 || request.version == Version.V1_1) {
+            return new SimpleBoard(request.board, request.player);
         }
 
         return null;

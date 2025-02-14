@@ -14,10 +14,9 @@ import connect4.data.responses.SolverResponse;
 public class Connector {
     public static SolverResponse makeBestMove(SolverRequest request) {
         //get best move
-        //BestMove bestMove = Solver.startSolver(request);
-
-        BestMove bestMove = SolverBitboard.startSolver(request);
+        BestMove bestMove = SolverGeneric.startSolver(request);
         Position position = Solver.getMoveFromCol(request.board, bestMove.move);
+        System.out.println(bestMove + "" + position);
         assert position != null;
 
         //make best move

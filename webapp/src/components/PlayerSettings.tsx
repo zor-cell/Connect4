@@ -4,20 +4,51 @@ import SliderCheckbox from "./SliderCheckbox.tsx";
 import "./PlayerSettings.css";
 import {GameState} from "../classes/GameState.ts";
 import {Player} from "../classes/Player.ts";
+import {Version} from "../classes/Version.ts";
 
 const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, setPlayer, onStart}) => {
     const [isAi, setIsAi] = useState(defaultIsAi);
     const [maxTime, setMaxTime] = useState(3000);
     const [maxMemory, setMaxMemory] = useState(64);
+    const [version, setVersion] = useState(Version.V2_0);
 
     useEffect(() => {
         let player: Player = {
             isAi: isAi,
             maxTime: maxTime,
-            maxMemory: maxMemory
+            maxMemory: maxMemory,
+            version: version
         };
         setPlayer(player);
-    }, [isAi, maxTime, maxMemory]);
+    }, [isAi, maxTime, maxMemory, version]);
+
+    function fromVersionString(versionString: string): Version {
+        if(versionString == "1.0") {
+            return Version.V1_0;
+        } else if(versionString == "1.1") {
+            return Version.V1_1;
+        } else if(versionString == "2.0") {
+            return Version.V2_0;
+        } else if(versionString == "2.1") {
+            return Version.V2_1;
+        }
+
+        return Version.V1_0;
+    }
+
+    function toVersionString(version: Version): string {
+        if(version == Version.V1_0) {
+            return "1.0";
+        } else if(version == Version.V1_1) {
+            return "1.1";
+        } else if(version == Version.V2_0) {
+            return "2.0";
+        } else if(version == Version.V2_1) {
+            return "2.1";
+        }
+
+        return "1.0";
+    }
 
     return (
         <div id="settings" className="flex-container gap-2 m-2 p-2">
@@ -49,11 +80,15 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
             </div>}
             {isAi && <div className="grid-container">
                 <label htmlFor="version-select">Version</label>
-                <select id="version-select" className="custom-form-input">
+                <select id="version-select" className="custom-form-input" defaultValue={toVersionString(version)}
+                        onChange={(event) => {
+                            let curVersion = fromVersionString(event.target.value);
+                            setVersion(curVersion);
+                        }}>
                     <option value={"1.0"}>v1.0 (2D)</option>
-                    <option value={"1.1"}>v1.1 (2DT)</option>
-                    <option value={"2.0"}>v2.1 (BB)</option>
-                    <option value={"2.1"}>v3.0 (BBT)</option>
+                    <option value={"1.1"}>v1.1 (2D+T)</option>
+                    <option value={"2.0"}>v2.0 (BB)</option>
+                    <option value={"2.1"}>v2.1 (BB+T)</option>
                 </select>
             </div>}
             {isAi && hasStart && <button className="btn btn-primary mt-2" onClick={onStart}>

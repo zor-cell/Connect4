@@ -9,7 +9,7 @@ public class TranspositionTable {
         int size = (maxMB * 1024 * 1024) / byteSize;
 
         entries = new TableEntry[size];
-        System.out.println("Table of size " + entries.length);
+        System.out.println("Initiated table with " + entries.length + " entries!");
     }
 
     public TableEntry get(long key) {

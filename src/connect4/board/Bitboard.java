@@ -6,11 +6,11 @@ import connect4.data.Scores;
 public class Bitboard implements Board {
     public final int rows;
     public final int cols;
+    private int player;
+    private int moves = 0;
 
     private long currentPlayer = 0L;
     private long allPlayers = 0L;
-    private int moves = 0;
-    private int player;
 
     public Bitboard(Bitboard bitboard) {
         this.rows = bitboard.rows;

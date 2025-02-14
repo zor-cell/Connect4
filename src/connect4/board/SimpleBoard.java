@@ -1,11 +1,50 @@
 package connect4.board;
 
 import connect4.data.GameState;
+import connect4.data.Position;
+import connect4.data.Scores;
 
 public class SimpleBoard implements Board {
+    public final int rows;
+    public final int cols;
+    private int player;
+    private int moves = 0;
+
+    private final int[][] board;
+
+    public SimpleBoard(SimpleBoard simpleBoard) {
+        this.rows = simpleBoard.rows;
+        this.cols = simpleBoard.cols;
+        this.player = simpleBoard.player;
+        this.moves = simpleBoard.moves;
+
+        this.board = new int[rows][cols];
+        for(int i = 0;i < rows;i++) {
+            System.arraycopy(simpleBoard.board[i], 0, this.board[i], 0, cols);
+        }
+    }
+
+    public SimpleBoard(int[][] board, int player) {
+        this.rows = board.length;
+        this.cols = board[0].length;
+        this.player = player;
+
+        this.board = new int[rows][cols];
+        for(int i = 0;i < rows;i++) {
+            for(int j = 0;j < cols;j++) {
+                if(board[i][j] != 0) {
+                    moves++;
+                }
+
+                this.board[i][j] = board[i][j];
+            }
+        }
+    }
+
     @Override
     public boolean canMakeMove(int col) {
-        return false;
+        Position move = getMoveFromCol(col);
+        return move != null;
     }
 
     @Override
@@ -15,31 +54,148 @@ public class SimpleBoard implements Board {
 
     @Override
     public void makeMove(int col) {
+        Position move = getMoveFromCol(col);
+        assert move != null;
 
+        board[move.i][move.j] = player;
+        moves++;
+        player *= -1;
     }
 
     @Override
     public GameState getGameState() {
-        return null;
+        //check for win
+        int[][] dirs = {
+                {1, 0}, //vertical
+                {0, 1}, //horizontal
+                {1, 1}, //diagonal down
+                {1, -1} //diagonal up
+        };
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                int cur = board[i][j];
+                if(cur == 0) continue;
+
+                for (int[] dir : dirs) {
+                    //check 4 in a row
+                    int countPlayer = 1;
+                    for (int k = 1; k < 4; k++) {
+                        Position next = new Position(i + dir[0] * k, j + dir[1] * k);
+                        if(!next.isInBounds(rows, cols)) break;
+
+                        if(board[next.i][next.j] == cur) {
+                            countPlayer++;
+                        }
+                    }
+
+                    if(countPlayer == 4) {
+                        return cur == 1 ? GameState.PLAYER1 : GameState.PLAYER2;
+                    }
+                }
+            }
+        }
+
+        //check for draw
+        boolean draw = true;
+        for(int j = 0;j < cols;j++) {
+            if(board[0][j] == 0) {
+                draw = false;
+                break;
+            }
+        }
+        if(draw) return GameState.DRAW;
+
+        return GameState.RUNNING;
     }
 
     @Override
     public int getMoves() {
-        return 0;
+        return moves;
     }
 
     @Override
     public int getColumns() {
-        return 0;
+        return cols;
     }
 
     @Override
     public long getHash() {
-        return 0;
+        long hash = 7;
+        for(int i = 0;i < rows;i++) {
+            for(int j = 0;j < cols;j++) {
+                hash += (long) board[i][j] * (i + 1) * (j + 1);
+            }
+        }
+
+        return hash;
     }
 
     @Override
     public int heuristics() {
-        return 0;
+        int pieces = 0;
+        for(int i = 0;i < rows;i++) {
+            for(int j = 0;j < cols;j++) {
+                if(board[i][j] != 0) {
+                    pieces++;
+                }
+            }
+        }
+
+        int score = 0;
+        for(int player : new int[] {-1, 1}) {
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    //direction is important since no empty can be below v, dl and dr
+                    int[][] dirs = {
+                            {-1, 0}, //vertical v
+                            {0, 1}, //horizontal h
+                            {-1, -1}, //diagonal left dl
+                            {-1, 1} //diagonal right dr
+                    };
+
+                    for (int[] dir : dirs) {
+                        int countPlayer = 0;
+                        int countEmpty = 0;
+                        for (int k = 0; k <= 3; k++) {
+                            Position next = new Position(i + dir[0] * k, j + dir[1] * k);
+                            if(!next.isInBounds(rows, cols)) break;
+
+                            if(board[next.i][next.j] == player) {
+                                countPlayer++;
+                            } else if(board[next.i][next.j] == 0) {
+                                countEmpty++;
+                            }
+                        }
+
+                        if(countPlayer == 4) {
+                            //4 in a row
+                            score += player * 1000;
+                        } else if(countPlayer == 3 && countEmpty == 1) {
+                            //3 in row with 1 empty somewhere between
+                            score += player * Scores.THREE_IN_ROW;
+                        } else if(countPlayer == 2 && countEmpty == 2) {
+                            //2 in row with 2 empties somewhere between
+                            score += player * Scores.TWO_IN_ROW;
+                        }
+                    }
+                }
+            }
+        }
+
+        int t = rows * cols - pieces;
+        return score;
+    }
+
+    public Position getMoveFromCol(int col) {
+        int i = board.length - 1;
+        while(i >= 0 && board[i][col] != 0) {
+            i--;
+        }
+        if(i >= 0) {
+            return new Position(i, col);
+        }
+
+        return null;
     }
 }

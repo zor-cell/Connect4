@@ -21,13 +21,21 @@ public class SolverGeneric extends Thread {
     private int tableStored = 0;
 
 
+    private final boolean useTable;
     private final TranspositionTable table;
     private BestMove prevBestMove;
     private BestMove bestMove;
 
     public SolverGeneric(SolverRequest request) {
         this.config = request;
-        this.table = new TranspositionTable(Math.max(request.tableSize, 0));
+
+        if(config.version == Version.V1_1 || config.version == Version.V2_1) {
+            useTable = true;
+            table = new TranspositionTable(Math.max(request.tableSize, 0));
+        } else {
+            useTable = false;
+            table = null;
+        }
     }
 
     public static void main(String[] args) {
@@ -44,12 +52,14 @@ public class SolverGeneric extends Thread {
 
         //with time = 5000, depth = 11
         //depth =
-        SolverRequest request = new SolverRequest(board, -1, 3000, -1, 64, Version.V2_1);
+        SolverRequest request = new SolverRequest(board, -1, 3000, -1, 16, Version.V2_1);
         BestMove bestMove = startSolver(request);
         System.out.println(bestMove);
     }
 
     public static BestMove startSolver(SolverRequest request) {
+        System.out.println("Starting Solver!");
+
         SolverGeneric solverThread = new SolverGeneric(request);
         solverThread.start();
 
@@ -101,20 +111,22 @@ public class SolverGeneric extends Thread {
         }
 
         //transposition table lookup
-        TableEntry storedEntry = table.get(board.getHash());
-        if(storedEntry != null && storedEntry.depth >= depth) {
-            tableStored++;
+        if(useTable) {
+            TableEntry storedEntry = table.get(board.getHash());
+            if (storedEntry != null && storedEntry.depth >= depth) {
+                tableStored++;
 
-            if(storedEntry.flag == TableFlag.EXACT) {
-                return storedEntry.bestMove;
-            } else if(storedEntry.flag == TableFlag.LOWER_BOUND) {
-                alpha = Math.max(alpha, storedEntry.bestMove.score);
-            } else if(storedEntry.flag == TableFlag.UPPER_BOUND) {
-                beta = Math.min(beta, storedEntry.bestMove.score);
-            }
+                if (storedEntry.flag == TableFlag.EXACT) {
+                    return storedEntry.bestMove;
+                } else if (storedEntry.flag == TableFlag.LOWER_BOUND) {
+                    alpha = Math.max(alpha, storedEntry.bestMove.score);
+                } else if (storedEntry.flag == TableFlag.UPPER_BOUND) {
+                    beta = Math.min(beta, storedEntry.bestMove.score);
+                }
 
-            if(alpha > beta) {
-                return storedEntry.bestMove;
+                if (alpha > beta) {
+                    return storedEntry.bestMove;
+                }
             }
         }
 
@@ -161,14 +173,16 @@ public class SolverGeneric extends Thread {
         }
 
         //save result to transposition table
-        TableFlag flag = TableFlag.EXACT;
-        if(bestMove.score <= alphaOrigin) {
-            flag = TableFlag.UPPER_BOUND;
-        } else if(bestMove.score >= beta) {
-            flag = TableFlag.LOWER_BOUND;
+        if(useTable) {
+            TableFlag flag = TableFlag.EXACT;
+            if (bestMove.score <= alphaOrigin) {
+                flag = TableFlag.UPPER_BOUND;
+            } else if (bestMove.score >= beta) {
+                flag = TableFlag.LOWER_BOUND;
+            }
+            TableEntry saveEntry = new TableEntry(board.getHash(), depth, flag, bestMove);
+            table.put(saveEntry);
         }
-        TableEntry saveEntry = new TableEntry(board.getHash(), depth, flag, bestMove);
-        table.put(saveEntry);
 
         return bestMove;
     }
