@@ -74,7 +74,7 @@ public class SolverBitboard extends Thread {
             Bitboard bitboard = new Bitboard(config.board, config.player);
 
             //iterative deepening
-            int maxDepth = config.maxDepth >= 1 ? config.maxDepth : 42;
+            int maxDepth = config.maxDepth >= 1 ? config.maxDepth : 42 - bitboard.getMoves();
             for(depth = 1;depth <= maxDepth;depth++) {
                 //the best move score is > 0 when favorable for config.player (no matter which player)
                 prevBestMove = negamax(bitboard, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
@@ -82,7 +82,7 @@ public class SolverBitboard extends Thread {
                 bestMove = prevBestMove;
             }
 
-            System.out.println("Solver Thread finished!");
+            System.out.println("Solver Thread finished normally. Reached depth " + maxDepth + "!");
         } catch(InterruptedException e) {
             System.out.println("Solver Thread interrupted. Reached depth " + (depth - 1) + "!");
         }

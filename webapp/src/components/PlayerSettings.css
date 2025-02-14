@@ -8,13 +8,7 @@
     border-radius: 5px;
 }
 
-#max-time-input {
-    height: var(--form-height);
-    border: 1px solid var(--border-color);
-    border-radius: 5px;
-}
-
-#version-select {
+.custom-form-input {
     height: var(--form-height);
     border: 1px solid var(--border-color);
     border-radius: 5px;

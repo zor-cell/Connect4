@@ -8,7 +8,7 @@ import {Player} from "../classes/Player.ts";
 const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, setPlayer, onStart}) => {
     const [isAi, setIsAi] = useState(defaultIsAi);
     const [maxTime, setMaxTime] = useState(3000);
-    const [maxMemory, setMaxMemory] = useState(16);
+    const [maxMemory, setMaxMemory] = useState(64);
 
     useEffect(() => {
         let player: Player = {
@@ -27,7 +27,7 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
             </div>
             {isAi && <div className="grid-container">
                 <label htmlFor="max-time-input">Max Time (ms)</label>
-                <input id="max-time-input" type="number" min="0" max="60000" step="500"
+                <input id="max-time-input" className="custom-form-input" type="number" min="0" max="60000" step="500"
                    placeholder="Time in ms" defaultValue={maxTime}
                    onChange={(event) => {
                        if (event.target.valueAsNumber > 60000) event.target.value = "60000";
@@ -38,10 +38,10 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
             </div>}
             {isAi && <div className="grid-container">
                 <label htmlFor="max-memory-input">Table Size (MB)</label>
-                <input id="max-memory-input" type="number" min="0" max="64" step="1"
+                <input id="max-memory-input" className="custom-form-input" type="number" min="0" max="256" step="1"
                        placeholder="Table size in MB" defaultValue={maxMemory}
                        onChange={(event) => {
-                           if (event.target.valueAsNumber > 64) event.target.value = "64";
+                           if (event.target.valueAsNumber > 256) event.target.value = "256";
                            else if (event.target.valueAsNumber < 0) event.target.value = "0";
 
                            setMaxMemory(event.target.valueAsNumber);
@@ -49,7 +49,7 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
             </div>}
             {isAi && <div className="grid-container">
                 <label htmlFor="version-select">Version</label>
-                <select id="version-select">
+                <select id="version-select" className="custom-form-input">
                     <option value={"v1"}>2D Array</option>
                     <option value={"v2"}>Bitboard</option>
                 </select>
