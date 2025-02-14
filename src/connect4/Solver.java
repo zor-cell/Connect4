@@ -1,9 +1,6 @@
 package connect4;
 
-import connect4.data.BestMove;
-import connect4.data.GameState;
-import connect4.data.Position;
-import connect4.data.Scores;
+import connect4.data.*;
 import connect4.data.requests.SolverRequest;
 
 import java.util.ArrayList;
@@ -38,7 +35,7 @@ public class Solver extends Thread {
         };
 
         //with time = 5000, depth = 11
-        SolverRequest request = new SolverRequest(board, -1, 5000, -1, 0);
+        SolverRequest request = new SolverRequest(board, -1, 5000, -1, 0, Version.V1_0);
         BestMove bestMove = startSolver(request);
         System.out.println(bestMove);
     }

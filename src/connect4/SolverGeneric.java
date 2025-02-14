@@ -1,6 +1,6 @@
 package connect4;
 
-import connect4.board.Bitboard;
+import connect4.board.Board;
 import connect4.data.BestMove;
 import connect4.data.GameState;
 import connect4.data.Scores;
@@ -10,9 +10,11 @@ import connect4.table.TableEntry;
 import connect4.table.TableFlag;
 import connect4.table.TranspositionTable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-public class SolverBitboard extends Thread {
+public class SolverGeneric extends Thread {
     private final SolverRequest config;
     private long startTime;
     private int nodesVisited = 0;
@@ -23,32 +25,32 @@ public class SolverBitboard extends Thread {
     private BestMove prevBestMove;
     private BestMove bestMove;
 
-    public SolverBitboard(SolverRequest config) {
-        this.config = config;
-        this.table = new TranspositionTable(Math.max(config.tableSize, 0));
+    public SolverGeneric(SolverRequest request) {
+        this.config = request;
+        this.table = new TranspositionTable(Math.max(request.tableSize, 0));
     }
 
     public static void main(String[] args) {
         int[][] board = {
-               //0, 1, 2, 3, 4, 5, 6
+                //0, 1, 2, 3, 4, 5, 6
                 {0, 0, 0, 0, 0, 0, 0},   //0
                 {0, 0, 0, 0, 0, 0, 0},   //1
                 {0, 0, 0, 0, 0, 0, 0},   //2
                 {0, 0, 0, 0, 0, 0, 0},   //3
                 {0, 0, 0, 0, 0, 0, 0}, //4
                 {0, 0, 0, 1, 0, 0, 0},   //5
-               //0, 1, 2, 3, 4, 5, 6
+                //0, 1, 2, 3, 4, 5, 6
         };
 
         //with time = 5000, depth = 11
         //depth =
-        SolverRequest request = new SolverRequest(board, 1, 10000, -1, 1, Version.V2_1);
+        SolverRequest request = new SolverRequest(board, -1, 3000, -1, 64, Version.V2_1);
         BestMove bestMove = startSolver(request);
         System.out.println(bestMove);
     }
 
     public static BestMove startSolver(SolverRequest request) {
-        SolverBitboard solverThread = new SolverBitboard(request);
+        SolverGeneric solverThread = new SolverGeneric(request);
         solverThread.start();
 
         try {
@@ -73,7 +75,7 @@ public class SolverBitboard extends Thread {
             startTime = System.currentTimeMillis();
 
             //copy board instance because on interrupt, board can be in any state
-            Bitboard bitboard = new Bitboard(config.board, config.player);
+            Board bitboard = Board.getInstance(config);
 
             //iterative deepening
             int maxDepth = config.maxDepth >= 1 ? config.maxDepth : 42 - bitboard.getMoves();
@@ -90,7 +92,7 @@ public class SolverBitboard extends Thread {
         }
     }
 
-    private BestMove negamax(Bitboard board, int depth, int alpha, int beta) throws InterruptedException {
+    private BestMove negamax(Board board, int depth, int alpha, int beta) throws InterruptedException {
         int alphaOrigin = alpha;
 
         //break out of computation when max thinking time is surpassed
@@ -119,7 +121,7 @@ public class SolverBitboard extends Thread {
         nodesVisited++;
 
         //check if player can easily win on next move and instantly make move
-        for(int move = 0;move < board.cols;move++) {
+        for(int move = 0;move < board.getColumns();move++) {
             if(board.isWinningMove(move)) {
                 return new BestMove(move, Scores.WIN - board.getMoves(), 0);
             }
@@ -135,7 +137,7 @@ public class SolverBitboard extends Thread {
         //go through children positions
         BestMove bestMove = new BestMove(null, Integer.MIN_VALUE, -1);
         for(Integer move : getPossibleMoves(board)) {
-            Bitboard moveBoard = new Bitboard(board);
+            Board moveBoard = Board.getInstance(board);
             moveBoard.makeMove(move);
 
             BestMove child = negamax(moveBoard, depth - 1, invert(beta), invert(alpha));
@@ -171,7 +173,7 @@ public class SolverBitboard extends Thread {
         return bestMove;
     }
 
-    private List<Integer> getPossibleMoves(Bitboard board) {
+    private List<Integer> getPossibleMoves(Board board) {
         List<Integer> moves = new ArrayList<>();
 
         //order columns for better pruning

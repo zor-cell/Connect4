@@ -50,8 +50,10 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
             {isAi && <div className="grid-container">
                 <label htmlFor="version-select">Version</label>
                 <select id="version-select" className="custom-form-input">
-                    <option value={"v1"}>2D Array</option>
-                    <option value={"v2"}>Bitboard</option>
+                    <option value={"1.0"}>v1.0 (2D)</option>
+                    <option value={"1.1"}>v1.1 (2DT)</option>
+                    <option value={"2.0"}>v2.1 (BB)</option>
+                    <option value={"2.1"}>v3.0 (BBT)</option>
                 </select>
             </div>}
             {isAi && hasStart && <button className="btn btn-primary mt-2" onClick={onStart}>

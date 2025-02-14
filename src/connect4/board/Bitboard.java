@@ -1,4 +1,4 @@
-package connect4;
+package connect4.board;
 
 import connect4.data.GameState;
 import connect4.data.Scores;
@@ -60,12 +60,20 @@ public class Bitboard implements Board {
         System.out.println(bitboard.heuristics());
     }
 
-    public int getMoves() {return moves;}
-
+    @Override
     public boolean canMakeMove(int col) {
         return (allPlayers & topMask(col)) == 0;
     }
 
+    @Override
+    public boolean isWinningMove(int col) {
+        long copy = currentPlayer;
+        copy |= (allPlayers + bottomMask(col)) & columnMask(col); //why column mask???
+
+        return isWinningPosition(copy);
+    }
+
+    @Override
     public void makeMove(int col) {
         //switch player
         currentPlayer ^= allPlayers;
@@ -77,34 +85,35 @@ public class Bitboard implements Board {
         player *= -1;
     }
 
-    public boolean isWinningMove(int col) {
-        long copy = currentPlayer;
-        copy |= (allPlayers + bottomMask(col)) & columnMask(col); //why column mask???
-
-        return isWinningPosition(copy);
-    }
-
-    public boolean isWinningPosition(long pos) {
-        long m;
-
-        //the bitshifts to compute 4-in-row
-        int[] shifts = {
-                rows + 1, //horizontal
-                1, //vertical
-                rows, //diagonal down
-                rows + 2 //diagonal up
-        };
-
-        for(int shift : shifts) {
-            m = pos & (pos >> shift); //makes sure to not count empty spaces between pieces
-            if((m & (m >> 2 * shift)) > 0) {
-                return true;
-            }
+    @Override
+    public GameState getGameState() {
+        if(isWinningPosition(currentPlayer)) {
+            return (player == 1 ? GameState.PLAYER1 : GameState.PLAYER2);
+        } else if(isWinningPosition(currentPlayer ^ allPlayers)) {
+            return (player == 1 ? GameState.PLAYER2 : GameState.PLAYER1);
         }
 
-        return false;
+        if(moves == rows * cols) {
+            return GameState.DRAW;
+        }
+
+        return GameState.RUNNING;
     }
 
+    @Override
+    public int getMoves() {return moves;}
+
+    @Override
+    public int getColumns() {
+        return cols;
+    }
+
+    @Override
+    public long getHash() {
+        return currentPlayer + allPlayers;
+    }
+
+    @Override
     public int heuristics() {
         long opponentPlayer = currentPlayer ^ allPlayers;
 
@@ -181,19 +190,27 @@ public class Bitboard implements Board {
         return score;
     }
 
-    public GameState getGameState() {
-        if(isWinningPosition(currentPlayer)) {
-            return (player == 1 ? GameState.PLAYER1 : GameState.PLAYER2);
-        } else if(isWinningPosition(currentPlayer ^ allPlayers)) {
-            return (player == 1 ? GameState.PLAYER2 : GameState.PLAYER1);
+    public boolean isWinningPosition(long pos) {
+        long m;
+
+        //the bitshifts to compute 4-in-row
+        int[] shifts = {
+                rows + 1, //horizontal
+                1, //vertical
+                rows, //diagonal down
+                rows + 2 //diagonal up
+        };
+
+        for(int shift : shifts) {
+            m = pos & (pos >> shift); //makes sure to not count empty spaces between pieces
+            if((m & (m >> 2 * shift)) > 0) {
+                return true;
+            }
         }
 
-        if(moves == rows * cols) {
-            return GameState.DRAW;
-        }
-
-        return GameState.RUNNING;
+        return false;
     }
+
 
     //a single 1 in the top cell of the given column
     private long topMask(int col) {
@@ -238,23 +255,6 @@ public class Bitboard implements Board {
 
         //board has wrong orientation
         return rotateCW(board);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Bitboard)) return false;
-        Bitboard bitboard = (Bitboard) o;
-        return hashCode() == bitboard.hashCode();
-    }
-
-    @Override
-    public int hashCode() {
-        return (int) (currentPlayer + allPlayers);
-    }
-
-    public long getHash() {
-        return currentPlayer + allPlayers;
     }
 
     @Override
