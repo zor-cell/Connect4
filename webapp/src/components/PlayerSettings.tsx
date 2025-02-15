@@ -24,8 +24,6 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
     function fromVersionString(versionString: string): Version {
         if(versionString == "1.0") {
             return Version.V1_0;
-        } else if(versionString == "1.1") {
-            return Version.V1_1;
         } else if(versionString == "2.0") {
             return Version.V2_0;
         } else if(versionString == "2.1") {
@@ -38,8 +36,6 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
     function toVersionString(version: Version): string {
         if(version == Version.V1_0) {
             return "1.0";
-        } else if(version == Version.V1_1) {
-            return "1.1";
         } else if(version == Version.V2_0) {
             return "2.0";
         } else if(version == Version.V2_1) {
@@ -89,9 +85,9 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
                     <option value={"2.1"}>v2.1 (BB+T)</option>
                 </select>
             </div>}
-            <button className="btn btn-primary mt-2" style={{visibility: isAi && hasStart ? "visible" : "hidden"}} onClick={onStart}>
+            {isAi && hasStart && <button className="btn btn-primary mt-2" onClick={onStart}>
                 <i className="bi bi-play-circle"></i> Play
-            </button>
+            </button>}
         </div>
     );
 };
