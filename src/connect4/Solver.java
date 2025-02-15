@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class SolverGeneric extends Thread {
+public class Solver extends Thread {
     private final SolverRequest config;
     private long startTime;
     private int nodesVisited = 0;
@@ -26,7 +26,7 @@ public class SolverGeneric extends Thread {
     private BestMove prevBestMove;
     private BestMove bestMove;
 
-    public SolverGeneric(SolverRequest request) {
+    public Solver(SolverRequest request) {
         this.config = request;
 
         if(config.version == Version.V2_1) {
@@ -60,7 +60,7 @@ public class SolverGeneric extends Thread {
     public static BestMove startSolver(SolverRequest request) {
         System.out.println("Starting Solver!");
 
-        SolverGeneric solverThread = new SolverGeneric(request);
+        Solver solverThread = new Solver(request);
         solverThread.start();
 
         try {

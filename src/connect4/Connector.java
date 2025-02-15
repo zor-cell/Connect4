@@ -1,6 +1,5 @@
 package connect4;
 
-import connect4.board.Board;
 import connect4.board.SimpleBoard;
 import connect4.data.*;
 import connect4.data.requests.MoveRequest;
@@ -18,7 +17,7 @@ public class Connector {
         SimpleBoard board = new SimpleBoard(request.board, request.player);
 
         //get best move
-        BestMove bestMove = SolverGeneric.startSolver(request);
+        BestMove bestMove = Solver.startSolver(request);
         Position position = board.getMoveFromCol(bestMove.move);
         assert position != null;
 
