@@ -29,7 +29,7 @@ public class SolverGeneric extends Thread {
     public SolverGeneric(SolverRequest request) {
         this.config = request;
 
-        if(config.version == Version.V1_1 || config.version == Version.V2_1) {
+        if(config.version == Version.V2_1) {
             useTable = true;
             table = new TranspositionTable(Math.max(request.tableSize, 0));
         } else {

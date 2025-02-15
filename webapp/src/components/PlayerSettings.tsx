@@ -85,7 +85,6 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
                             setVersion(curVersion);
                         }}>
                     <option value={"1.0"}>v1.0 (2D)</option>
-                    <option value={"1.1"}>v1.1 (2D+T)</option>
                     <option value={"2.0"}>v2.0 (BB)</option>
                     <option value={"2.1"}>v2.1 (BB+T)</option>
                 </select>

@@ -68,7 +68,7 @@ public interface Board {
     static Board getInstance(SolverRequest request) {
         if(request.version == Version.V2_0 || request.version == Version.V2_1) {
             return new Bitboard(request.board, request.player);
-        } else if(request.version == Version.V1_0 || request.version == Version.V1_1) {
+        } else if(request.version == Version.V1_0) {
             return new SimpleBoard(request.board, request.player);
         }
 
