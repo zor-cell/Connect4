@@ -229,6 +229,10 @@ public class SimpleBoard implements Board {
         return score * player;
     }
 
+    public int[][] getBoard() {
+        return board;
+    }
+
     public Position getMoveFromCol(int col) {
         int i = board.length - 1;
         while(i >= 0 && board[i][col] != 0) {
@@ -239,5 +243,11 @@ public class SimpleBoard implements Board {
         }
 
         return null;
+    }
+
+    public void unmakeMove(Position move) {
+        board[move.i][move.j] = 0;
+        moves--;
+        player *= -1;
     }
 }

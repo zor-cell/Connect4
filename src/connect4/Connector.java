@@ -1,5 +1,7 @@
 package connect4;
 
+import connect4.board.Board;
+import connect4.board.SimpleBoard;
 import connect4.data.*;
 import connect4.data.requests.MoveRequest;
 import connect4.data.requests.SolverRequest;
@@ -13,44 +15,52 @@ import connect4.data.responses.SolverResponse;
  */
 public class Connector {
     public static SolverResponse makeBestMove(SolverRequest request) {
+        SimpleBoard board = new SimpleBoard(request.board, request.player);
+
         //get best move
         BestMove bestMove = SolverGeneric.startSolver(request);
-        Position position = Solver.getMoveFromCol(request.board, bestMove.move);
+        Position position = board.getMoveFromCol(bestMove.move);
         assert position != null;
 
         //make best move
-        Solver.makeMove(request.board, position, request.player);
+        board.makeMove(position.j);
 
         //compute current game state
-        GameState gameState = Solver.getGameState(request.board);
+        GameState gameState = board.getGameState();
 
-        return new SolverResponse(request.board, gameState, position, bestMove.score, bestMove.winDistance);
+        return new SolverResponse(board.getBoard(), gameState, position, bestMove.score, bestMove.winDistance);
     }
 
     public static MoveResponse makeMove(MoveRequest request) {
+        SimpleBoard board = new SimpleBoard(request.board, request.player);
+
         //get move
-        Position move = Solver.getMoveFromCol(request.board, request.position.j);
+        Position move = board.getMoveFromCol(request.position.j);
+
         //check for invalid move
         if(move == null) {
             return new MoveResponse(request.board, null, GameState.RUNNING);
         }
 
         //make valid move
-        Solver.makeMove(request.board, move, request.player);
+        board.makeMove(move.j);
 
         //compute current game state
-        GameState gameState = Solver.getGameState(request.board);
+        GameState gameState = board.getGameState();
 
-        return new MoveResponse(request.board, move, gameState);
+        return new MoveResponse(board.getBoard(), move, gameState);
     }
 
     public static MoveResponse undoMove(UndoRequest request) {
+        //does not matter which players turn it is for undo
+        SimpleBoard board = new SimpleBoard(request.board, 1);
+
         //undo move
-        Solver.unmakeMove(request.board, request.position);
+        board.unmakeMove(request.position);
 
         //compute current game state (is not really necessary but why not)
-        GameState gameState = Solver.getGameState(request.board);
+        GameState gameState = board.getGameState();
 
-        return new MoveResponse(request.board, request.position, gameState);
+        return new MoveResponse(board.getBoard(), request.position, gameState);
     }
 }
