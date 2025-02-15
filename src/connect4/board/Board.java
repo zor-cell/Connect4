@@ -11,12 +11,14 @@ public interface Board {
     boolean canMakeMove(int col);
 
     /**
-     * Indicates whether making a move on the given column wins directly.
+     * Indicates whether making a move on the given column wins directly for the current player.
+     * The given column does not have to be a valid move.
      */
     boolean isWinningMove(int col);
 
     /**
-     * Make a move on the given column.
+     * Make a move on the given column for the current player.
+     * The given column must be a valid move.
      */
     void makeMove(int col);
 
@@ -37,7 +39,7 @@ public interface Board {
 
     /**
      * Gets a hash value of the current board position that can be used as
-     * a key in a transposition table.
+     * a unique key in a transposition table.
      */
     long getHash();
 
@@ -47,6 +49,9 @@ public interface Board {
      */
     int heuristics();
 
+    /**
+     * Returns the correct instance board for a given board by calling its copy constructor.
+     */
     static Board getInstance(Board board) {
         if(board instanceof Bitboard) {
             return new Bitboard((Bitboard) board);
@@ -57,6 +62,9 @@ public interface Board {
         return null;
     }
 
+    /**
+     * Returns the correct instance board for a given request.
+     */
     static Board getInstance(SolverRequest request) {
         if(request.version == Version.V2_0 || request.version == Version.V2_1) {
             return new Bitboard(request.board, request.player);

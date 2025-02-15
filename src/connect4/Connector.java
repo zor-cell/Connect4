@@ -16,7 +16,6 @@ public class Connector {
         //get best move
         BestMove bestMove = SolverGeneric.startSolver(request);
         Position position = Solver.getMoveFromCol(request.board, bestMove.move);
-        System.out.println(bestMove + "" + position);
         assert position != null;
 
         //make best move

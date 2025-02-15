@@ -52,7 +52,7 @@ public class SolverGeneric extends Thread {
 
         //with time = 5000, depth = 11
         //depth =
-        SolverRequest request = new SolverRequest(board, -1, 3000, -1, 16, Version.V2_1);
+        SolverRequest request = new SolverRequest(board, -1, 3000, -1, 16, Version.V1_0);
         BestMove bestMove = startSolver(request);
         System.out.println(bestMove);
     }

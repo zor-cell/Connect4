@@ -41,6 +41,24 @@ public class SimpleBoard implements Board {
         }
     }
 
+    public static void main(String[] args) {
+        int[][] board = {
+                //0, 1, 2, 3, 4, 5, 6
+                {0, 0, 0, 0, 0, 0, 0},   //0
+                {0, 0, 0, 0, 0, 0, 0},   //1
+                {0, 0, 1, 0, 0, 0, 0},   //2
+                {0, 0, -1, 0, 0, 0, 0},   //3
+                {0, 0, -1, -1, 1, 0, 0}, //4
+                {0, 0, -1, 1, 1, 1, 0},   //5
+                //0, 1, 2, 3, 4, 5, 6
+        };
+
+        Board simpleBoard = new SimpleBoard(board, -1);
+
+        System.out.println(simpleBoard.heuristics());
+        System.out.println(simpleBoard.isWinningMove(3));
+    }
+
     @Override
     public boolean canMakeMove(int col) {
         Position move = getMoveFromCol(col);
@@ -49,6 +67,40 @@ public class SimpleBoard implements Board {
 
     @Override
     public boolean isWinningMove(int col) {
+        if(!canMakeMove(col)) return false;
+
+        Position move = getMoveFromCol(col);
+        int[][] dirs = {
+                {1, 0}, //vertical down
+                {0, 1}, //horizontal right
+                {1, 1}, //diagonal down right
+                {1, -1}, //diagonal down left
+        };
+
+        for(int[] dir : dirs) {
+            int count = 0;
+            //check direction
+            for (int k = 1; k < 4; k++) {
+                Position next = new Position(move.i + dir[0] * k, move.j + dir[1] * k);
+                if(!next.isInBounds(rows, cols)) break;
+                if(board[next.i][next.j] != player) break;
+
+                count++;
+            }
+
+            //check inverse direction
+            int[] inv = {dir[0] * -1, dir[1] * -1};
+            for (int k = 1; k < 4; k++) {
+                Position next = new Position(move.i + inv[0] * k, move.j + inv[1] * k);
+                if(!next.isInBounds(rows, cols)) break;
+                if(board[next.i][next.j] != player) break;
+
+                count++;
+            }
+
+            if(count >= 3) return true;
+        }
+
         return false;
     }
 
@@ -133,15 +185,6 @@ public class SimpleBoard implements Board {
 
     @Override
     public int heuristics() {
-        int pieces = 0;
-        for(int i = 0;i < rows;i++) {
-            for(int j = 0;j < cols;j++) {
-                if(board[i][j] != 0) {
-                    pieces++;
-                }
-            }
-        }
-
         int score = 0;
         for(int player : new int[] {-1, 1}) {
             for (int i = 0; i < rows; i++) {
@@ -183,8 +226,7 @@ public class SimpleBoard implements Board {
             }
         }
 
-        int t = rows * cols - pieces;
-        return score;
+        return score * player;
     }
 
     public Position getMoveFromCol(int col) {

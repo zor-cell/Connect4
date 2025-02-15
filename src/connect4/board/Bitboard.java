@@ -191,9 +191,7 @@ public class Bitboard implements Board {
     }
 
     public boolean isWinningPosition(long pos) {
-        long m;
-
-        //the bitshifts to compute 4-in-row
+        //the bit shifts to compute 4-in-row
         int[] shifts = {
                 rows + 1, //horizontal
                 1, //vertical
@@ -201,6 +199,7 @@ public class Bitboard implements Board {
                 rows + 2 //diagonal up
         };
 
+        long m;
         for(int shift : shifts) {
             m = pos & (pos >> shift); //makes sure to not count empty spaces between pieces
             if((m & (m >> 2 * shift)) > 0) {

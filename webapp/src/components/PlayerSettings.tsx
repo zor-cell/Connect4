@@ -2,7 +2,6 @@ import {FC, useEffect, useState} from "react";
 import {PlayerSettingsProps} from "../classes/Props.ts";
 import SliderCheckbox from "./SliderCheckbox.tsx";
 import "./PlayerSettings.css";
-import {GameState} from "../classes/GameState.ts";
 import {Player} from "../classes/Player.ts";
 import {Version} from "../classes/Version.ts";
 
@@ -10,7 +9,7 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
     const [isAi, setIsAi] = useState(defaultIsAi);
     const [maxTime, setMaxTime] = useState(3000);
     const [maxMemory, setMaxMemory] = useState(64);
-    const [version, setVersion] = useState(Version.V2_0);
+    const [version, setVersion] = useState(Version.V2_1);
 
     useEffect(() => {
         let player: Player = {
@@ -67,7 +66,7 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
                        setMaxTime(event.target.valueAsNumber);
                    }}/>
             </div>}
-            {isAi && <div className="grid-container">
+            {isAi && (version == Version.V1_1 || version == Version.V2_1) && <div className="grid-container">
                 <label htmlFor="max-memory-input">Table Size (MB)</label>
                 <input id="max-memory-input" className="custom-form-input" type="number" min="0" max="256" step="1"
                        placeholder="Table size in MB" defaultValue={maxMemory}
@@ -91,9 +90,9 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
                     <option value={"2.1"}>v2.1 (BB+T)</option>
                 </select>
             </div>}
-            {isAi && hasStart && <button className="btn btn-primary mt-2" onClick={onStart}>
+            <button className="btn btn-primary mt-2" style={{visibility: isAi && hasStart ? "visible" : "hidden"}} onClick={onStart}>
                 <i className="bi bi-play-circle"></i> Play
-            </button>}
+            </button>
         </div>
     );
 };
