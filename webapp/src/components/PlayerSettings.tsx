@@ -28,6 +28,8 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
             return Version.V2_0;
         } else if(versionString == "2.1") {
             return Version.V2_1;
+        } else if(versionString == "x") {
+            return Version.PERFECT;
         }
 
         return Version.V1_0;
@@ -51,7 +53,7 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
                 <p className="m-0">Player {color}</p>
                 <SliderCheckbox isChecked={isAi} setIsChecked={setIsAi}/>
             </div>
-            {isAi && <div className="grid-container">
+            {isAi && (version !== Version.PERFECT) && <div className="grid-container">
                 <label htmlFor="max-time-input">Max Time (ms)</label>
                 <input id="max-time-input" className="custom-form-input" type="number" min="0" max="60000" step="500"
                    placeholder="Time in ms" defaultValue={maxTime}
@@ -83,6 +85,7 @@ const PlayerSettings: FC<PlayerSettingsProps> = ({color, defaultIsAi, hasStart, 
                     <option value={"1.0"}>v1.0 (2D)</option>
                     <option value={"2.0"}>v2.0 (BB)</option>
                     <option value={"2.1"}>v2.1 (BB+T)</option>
+                    <option value={"x"}>PERFECT</option>
                 </select>
             </div>}
             {isAi && hasStart && <button className="btn btn-primary mt-2" onClick={onStart}>

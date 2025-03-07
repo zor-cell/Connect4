@@ -16,6 +16,7 @@ import {
 import PlayerSettings from "./components/PlayerSettings.tsx";
 import {Player} from "./classes/Player.ts";
 import {Version} from "./classes/Version.ts";
+import {PerfectMove} from "./classes/dtos/PerfectMove.ts";
 
 const loadingToastId = toast.loading("Loading resources...");
 initWorker();
@@ -153,19 +154,56 @@ function App() {
         isLoading = true;
         setIsLoadingState(true);
 
-        const solverRequest: SolverRequest = {
-            board: board,
-            player: player,
-            maxTime: playerSettings.maxTime,
-            maxDepth: -1,
-            tableSize: playerSettings.maxMemory,
-            version: playerSettings.version
-        };
-        const workerRequest: WorkerRequest = {
-            type: 'BESTMOVE',
-            data: solverRequest
-        };
-        worker.postMessage(workerRequest);
+        if(playerSettings.version == Version.PERFECT) {
+            let moveString = moves.map(moves => (moves.j + 1).toString()).join("");
+
+            const params = new URLSearchParams();
+            params.append("position", moveString);
+            params.append("level", "10");
+            fetch(`https://ludolab.net/solve/connect4?${params}`, {
+                method: "GET",
+            }).then(response => {
+                return response.json();
+            }).then((data: PerfectMove[]) => {
+                const best = data.reduce((max, obj) => (obj.score > max.score ? obj : max), data[0]);
+                console.log(best)
+                let move = parseInt(best.move) - 1;
+                let score = best.score < 0 ? -100000 : 100000;
+                if(best.score == 0) score = 0;
+                let winDistance = 42 - moves.length - 2 * Math.abs(best.score);
+                console.log(winDistance, moves.length, Math.abs(best.score));
+
+                setScore(score);
+                setWinDistance(winDistance);
+                setLastAiPlayer(player);
+
+                const moveRequest: MoveRequest = {
+                    board: board,
+                    player: player,
+                    position: {i: -1, j: move}
+                };
+                const workerRequest: WorkerRequest = {
+                    type: 'MOVE',
+                    data: moveRequest
+                };
+                worker.postMessage(workerRequest);
+            })
+        } else {
+            //send to web worker
+            const solverRequest: SolverRequest = {
+                board: board,
+                player: player,
+                maxTime: playerSettings.maxTime,
+                maxDepth: -1,
+                tableSize: playerSettings.maxMemory,
+                version: playerSettings.version
+            };
+            const workerRequest: WorkerRequest = {
+                type: 'BESTMOVE',
+                data: solverRequest
+            };
+            worker.postMessage(workerRequest);
+        }
     }
 
     function startMakeMove(position: Position, player: number) {
@@ -268,7 +306,7 @@ function App() {
             </div>
 
             {<div className="flex-container mt-3 mb-4">
-                <p className="m-0"><b>Score:</b> {score}</p>
+                {winDistance < 0 && <p className="m-0"><b>Score:</b> {score}</p>}
                 {winDistance >= 0 && <p className="m-0">Player {getWinner() == 1 ? "Red" : "Yellow"} wins
                     in {Math.ceil(winDistance / 2)} moves!</p>}
             </div>}
