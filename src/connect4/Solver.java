@@ -56,7 +56,6 @@ public class Solver extends Thread {
         System.out.println(bestMove);
 
         //TODO: add symmetry detection to tranposition table
-        //TODO: add perfect ai by pascal pons
     }
 
     public static BestMove startSolver(SolverRequest request) {

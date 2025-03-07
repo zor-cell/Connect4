@@ -204,10 +204,6 @@ public class Bitboard implements Board {
                     if (left > 0 || right > 0) {
                         score += (Long.bitCount(left) + Long.bitCount(right)) * Scores.THREE_IN_ROW * player;
                     }
-
-
-                    //TODO: pattern ...1010... | ...0101...
-                    //TODO: pattern ...1001...
                 }
             }
         }
