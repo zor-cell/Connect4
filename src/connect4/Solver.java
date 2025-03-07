@@ -51,8 +51,7 @@ public class Solver extends Thread {
         };
 
         //with time = 5000, depth = 11
-        //depth =
-        SolverRequest request = new SolverRequest(board, -1, 3000, -1, 16, Version.V1_0);
+        SolverRequest request = new SolverRequest(board, -1, 3000, -1, 64, Version.V1_0);
         BestMove bestMove = startSolver(request);
         System.out.println(bestMove);
     }
@@ -68,8 +67,8 @@ public class Solver extends Thread {
         } catch(InterruptedException e) {
             System.out.println("Main Thread interrupted");
         }
-        System.out.println("Nodes looked up in Transposition table: " + String.format("%,d", solverThread.tableStored));
-        System.out.println("Nodes visited: " + String.format("%,d", solverThread.nodesVisited));
+        //System.out.println("Nodes looked up in Transposition table: " + String.format("%,d", solverThread.tableStored));
+        //System.out.println("Nodes visited: " + String.format("%,d", solverThread.nodesVisited));
 
         return solverThread.getBestMove();
     }
@@ -85,13 +84,14 @@ public class Solver extends Thread {
             startTime = System.currentTimeMillis();
 
             //copy board instance because on interrupt, board can be in any state
-            Board bitboard = Board.getInstance(config);
+            Board board = Board.getInstance(config);
+            assert board != null;
 
             //iterative deepening
-            int maxDepth = config.maxDepth >= 1 ? config.maxDepth : 42 - bitboard.getMoves();
+            int maxDepth = config.maxDepth >= 1 ? config.maxDepth : 42 - board.getMoves();
             for(depth = 1;depth <= maxDepth;depth++) {
                 //the best move score is > 0 when favorable for config.player (no matter which player)
-                prevBestMove = negamax(bitboard, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
+                prevBestMove = negamax(board, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
                 bestMove = prevBestMove;
             }
@@ -124,7 +124,7 @@ public class Solver extends Thread {
                     beta = Math.min(beta, storedEntry.bestMove.score);
                 }
 
-                if (alpha > beta) {
+                if (alpha >= beta) {
                     return storedEntry.bestMove;
                 }
             }

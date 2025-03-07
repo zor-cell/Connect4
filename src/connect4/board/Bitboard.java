@@ -45,19 +45,21 @@ public class Bitboard implements Board {
     public static void main(String[] args) {
         int[][] board = {
                 //0, 1, 2, 3, 4, 5, 6
-                {0, 0, 0, 1, 0, 0, 0},   //0
-                {0, 0, 0, 1, 0, 0, 0},   //1
-                {0, 0, 0, -1, 0, -1, 0},   //2
-                {0, 0, 0, 1, 0, -1, 0},   //3
-                {0, 0, 0, -1, 0, 1, 0}, //4
-                {0, 0, -1, 1, 1, 1, -1},   //5
+                {0, 0, 0, 0, 0, 0, 0},   //0
+                {0, 0, 0, 0, 0, 0, 0},   //1
+                {0, 0, 0, 0, 0, 0, 0},   //2
+                {0, 0, 1, 0, 0, 1, 0},   //3
+                {0, 0, 1, 0, 0, 1, 0}, //4
+                {0, 1, 1, 0, 1, 1, 0},   //5
                 //0, 1, 2, 3, 4, 5, 6
         };
 
-        Bitboard bitboard = new Bitboard(board, -1);
-        System.out.println(bitboard);
+        int tempPlayer = 1;
+        Board bitboard = new Bitboard(board, tempPlayer);
+        System.out.println("bitboard: " + bitboard.heuristics());
 
-        System.out.println(bitboard.heuristics());
+        Board simpleBoard = new SimpleBoard(board, tempPlayer);
+        System.out.println("simple board: " + simpleBoard.heuristics());
     }
 
     @Override
@@ -117,12 +119,6 @@ public class Bitboard implements Board {
     public int heuristics() {
         long opponentPlayer = currentPlayer ^ allPlayers;
 
-        /*if(isWinningPosition(currentPlayer)) {
-            return Scores.WIN;
-        } else if(isWinningPosition(opponentPlayer)) {
-            return -Scores.WIN;
-        }*/
-
         //whenever negation is needed, all bits to the left of the 42nd bit
         //should always be 0, since they are not used in the board
         //also, the topmost row is a sentinel row, so it should also be 0
@@ -148,6 +144,31 @@ public class Bitboard implements Board {
             }
 
             for (int shift : shifts) {
+                //detect patterns with 2 and 2 empties
+                {
+                    long t = pos & (pos >> shift); //detect 2 in a row
+                    long temp = (~allPlayers & ((~allPlayers & filterMask) >> shift)) & filterMask; //detect 2 empties in a row
+                    long left = temp & (t << 2 * shift); //check if left of 2 in row is 2 empties, ...0011...
+                    long right = temp & (t >> 2 * shift); //check if right of 2 in row is 2 empties, ...1100...
+
+                    long t1 = pos & (pos >> 3 * shift); //detect 2 on each end
+                    long ends = t1 & (temp >> shift); //...1001...
+
+                    temp = (~allPlayers & ((~allPlayers & filterMask) >> 3 * shift)) & filterMask; //detect 2 empties on each end
+                    long middle = temp & (t >> shift); //...0110...
+
+                    t = pos & (pos >> 2 * shift); //detect 2 with one space between
+                    temp = (~allPlayers & ((~allPlayers & filterMask) >> 2 * shift)) & filterMask; //detect 2 empties with one space between
+                    long left1 = temp & (t << shift); //...1010...
+                    long right1 = temp & (t >> shift); //...0101...
+
+
+                    int bits = Long.bitCount(left) + Long.bitCount(right) + Long.bitCount(ends) + Long.bitCount(middle) + Long.bitCount(left1) + Long.bitCount(right1);
+                    if(bits > 0) {
+                        score += bits * Scores.TWO_IN_ROW * player;
+                    }
+                }
+
                 //detect pattern ...01110...
                 {
                     //detect 3 in a row
@@ -165,7 +186,7 @@ public class Bitboard implements Board {
                     }
                 }
 
-                //detect pattern ...1101... | ...1011
+                //pattern ...1101... | ...1011
                 {
                     //detect 2 in a row
                     long t = pos & (pos >> shift);
@@ -183,6 +204,10 @@ public class Bitboard implements Board {
                     if (left > 0 || right > 0) {
                         score += (Long.bitCount(left) + Long.bitCount(right)) * Scores.THREE_IN_ROW * player;
                     }
+
+
+                    //TODO: pattern ...1010... | ...0101...
+                    //TODO: pattern ...1001...
                 }
             }
         }
@@ -190,7 +215,7 @@ public class Bitboard implements Board {
         return score;
     }
 
-    public boolean isWinningPosition(long pos) {
+    private boolean isWinningPosition(long pos) {
         //the bit shifts to compute 4-in-row
         int[] shifts = {
                 rows + 1, //horizontal

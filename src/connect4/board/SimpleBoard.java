@@ -173,14 +173,8 @@ public class SimpleBoard implements Board {
 
     @Override
     public long getHash() {
-        long hash = 7;
-        for(int i = 0;i < rows;i++) {
-            for(int j = 0;j < cols;j++) {
-                hash += (long) board[i][j] * (i + 1) * (j + 1);
-            }
-        }
-
-        return hash;
+        //transposition table is not used for simple board
+        return 0;
     }
 
     @Override

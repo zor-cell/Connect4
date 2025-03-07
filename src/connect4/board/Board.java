@@ -45,6 +45,7 @@ public interface Board {
 
     /**
      * Returns a heuristics score that ranks the current board position.
+     * This score does not check for winning positions (ie 4 in a row).
      * Positive results are good for the current player, negative results are bad for the current player.
      */
     int heuristics();
