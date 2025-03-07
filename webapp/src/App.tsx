@@ -166,12 +166,10 @@ function App() {
                 return response.json();
             }).then((data: PerfectMove[]) => {
                 const best = data.reduce((max, obj) => (obj.score > max.score ? obj : max), data[0]);
-                console.log(best)
                 let move = parseInt(best.move) - 1;
                 let score = best.score < 0 ? -100000 : 100000;
                 if(best.score == 0) score = 0;
                 let winDistance = 42 - moves.length - 2 * Math.abs(best.score);
-                console.log(winDistance, moves.length, Math.abs(best.score));
 
                 setScore(score);
                 setWinDistance(winDistance);
