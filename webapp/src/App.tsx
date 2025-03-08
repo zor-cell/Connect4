@@ -157,10 +157,13 @@ function App() {
         if(playerSettings.version == Version.PERFECT) {
             let moveString = moves.map(moves => (moves.j + 1).toString()).join("");
 
+            //on prod env redirects are necessary because of cors
+            const url = window.location.hostname.includes("localhost") ? "https://ludolab.net/solve/connect4" : "api/solve/connect4/";
             const params = new URLSearchParams();
             params.append("position", moveString);
             params.append("level", "10");
-            fetch(`solve/connect4/?${params}`, {
+
+            fetch(`${url}?${params}`, {
                 method: "GET",
             }).then(response => {
                 return response.json();

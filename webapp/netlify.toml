@@ -1,5 +1,5 @@
 [[redirects]]
 force = true
-from = "/solve/connect4"
 status = 200
-to = "https://ludolab.net/solve/connect4/:splat"
+from = "api/solve/connect4"
+to = "https://ludolab.net/solve/connect4"
