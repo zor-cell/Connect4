@@ -160,7 +160,7 @@ function App() {
             const params = new URLSearchParams();
             params.append("position", moveString);
             params.append("level", "10");
-            fetch(`https://ludolab.net/solve/connect4/?${params}`, {
+            fetch(`solve/connect4/?${params}`, {
                 method: "GET",
             }).then(response => {
                 return response.json();
