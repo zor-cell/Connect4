@@ -45,7 +45,7 @@ function App() {
         let payload: ResponseData = eventData.data;
         switch(eventData.type) {
             case 'LOAD':
-                toast.update(loadingToastId, {render: "Resources loaded!", type: "success", isLoading: false, autoClose: 5000});
+                toast.update(loadingToastId, {render: "Resources loaded!", type: "success", isLoading: false, autoClose: 5000, closeButton: true});
                 break;
             case 'UNDO':
                 const undoResponse = payload as MoveResponse;
